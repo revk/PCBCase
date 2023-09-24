@@ -6,7 +6,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <string.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <err.h>
 #include "pcb.h"
