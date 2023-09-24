@@ -10,6 +10,7 @@ struct pcb_val_s
    unsigned char isnum:1;       /* number */
    unsigned char isbool:1;      /* boolean */
    unsigned char istxt:1;       /* text */
+   unsigned char islit:1;       /* literal */
    union
    {                            /* the value */
       pcb_t *obj;
