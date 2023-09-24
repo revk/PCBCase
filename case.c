@@ -15,6 +15,7 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <math.h>
+#include "pcb.h"
 
 /* yet, all globals, what the hell */
 int debug = 0;
@@ -39,220 +40,7 @@ double spacing = 0;
 double delta = 0.01;
 double hullcap = 1;
 double hulledge = 1;
-//Curve delta
-
-/* strings from file, lots of common, so make a table */
-int strn = 0;
-const char **strs = NULL;       /* the object tags */
-const char *
-add_string (const char *s, const char *e)
-{                               /* allocates a string */
-   /* simplistic */
-   int n;
-   for (n = 0; n < strn; n++)
-      if (strlen (strs[n]) == (int) (e - s) && !memcmp (strs[n], s, (int) (e - s)))
-         return strs[n];
-   strs = realloc (strs, (++strn) * sizeof (*strs));
-   if (!strs)
-      errx (1, "malloc");
-   strs[n] = strndup (s, (int) (e - s));
-   return strs[n];
-}
-
-typedef struct obj_s obj_t;
-typedef struct value_s value_t;
-
-struct value_s
-{                               /* value */
-   /* only one set */
-   unsigned char isobj:1;       /* object */
-   unsigned char isnum:1;       /* number */
-   unsigned char isbool:1;      /* boolean */
-   unsigned char istxt:1;       /* text */
-   union
-   {                            /* the value */
-      obj_t *obj;
-      double num;
-      const char *txt;
-      unsigned char bool:1;
-   };
-};
-
-obj_t *pcb = NULL;
-
-struct obj_s
-{                               /* an object */
-   const char *tag;             /* object tag */
-   int valuen;                  /* number of values */
-   value_t *values;             /* the values */
-};
-
-obj_t *
-parse_obj (const char **pp, const char *e)
-{                               /* Scan an object */
-   const char *p = *pp;
-   obj_t *pcb = malloc (sizeof (*pcb));
-   if (p >= e)
-      errx (1, "EOF");
-   memset (pcb, 0, sizeof (*pcb));
-   if (*p != '(')
-      errx (1, "Expecting (\n%.20s\n", p);
-   p++;
-   if (p >= e)
-      errx (1, "EOF");
-   /* tag */
-   const char *t = p;
-   while (p < e && (isalnum (*p) || *p == '_'))
-      p++;
-   if (p == t)
-      errx (1, "Expecting tag\n%.20s\n", t);
-   pcb->tag = add_string (t, p);
-   /* values */
-   while (p < e)
-   {
-      while (p < e && isspace (*p))
-         p++;
-      if (*p == ')')
-         break;
-      pcb->values = realloc (pcb->values, (++(pcb->valuen)) * sizeof (*pcb->values));
-      if (!pcb->values)
-         errx (1, "malloc");
-      value_t *value = pcb->values + pcb->valuen - 1;
-      memset (value, 0, sizeof (*value));
-      /* value */
-      if (*p == '(')
-      {
-         value->isobj = 1;
-         value->obj = parse_obj (&p, e);
-         continue;
-      }
-      if (*p == '"')
-      {                         /* quoted text */
-         p++;
-         t = p;
-         while (p < e && *p != '"')
-         {
-            if (*p == '\\' && p[1])
-               p++;
-            p++;
-         }
-         if (p == e)
-            errx (1, "EOF");
-         value->istxt = 1;
-         value->txt = add_string (t, p);
-         p++;
-         continue;
-      }
-      t = p;
-      while (p < e && *p != ')' && *p != ' ')
-         p++;
-      if (p == e)
-         errx (1, "EOF");
-      /* work out some basic types */
-      if ((p - t) == 4 && !memcmp (t, "true", (int) (p - t)))
-      {
-         value->isbool = 1;
-         value->bool = 1;
-         continue;;
-      }
-      if ((p - t) == 5 && !memcmp (t, "false", (int) (p - t)))
-      {
-         value->isbool = 1;
-         continue;;
-      }
-      /* does it look like a value number */
-      const char *q = t;
-      if (q < p && *q == '-')
-         q++;
-      while (q < p && isdigit (*q))
-         q++;
-      if (q < p && *q == '.')
-      {
-         q++;
-         while (q < p && isdigit (*q))
-            q++;
-      }
-      if (q == p)
-      {                         /* seems legit */
-         char *val = strndup (t, q - t);
-         double v = 0;
-         if (sscanf (val, "%lf", &v) == 1)
-         {                      /* safe as we know followed by space or close bracket and not EOF */
-            value->isnum = 1;
-            value->num = v;
-            free (val);
-            continue;
-         }
-         free (val);
-      }
-      /* assume string */
-      value->istxt = 1;
-      value->txt = add_string (t, p);
-   }
-   if (p >= e)
-      errx (1, "EOF");
-   if (*p != ')')
-      errx (1, "Expecting )\n%.20s\n", p);
-   p++;
-   while (p < e && isspace (*p))
-      p++;
-   *pp = p;
-   return pcb;
-}
-
-void
-dump_obj (obj_t * o)
-{
-   printf ("(%s", o->tag);
-   for (int n = 0; n < o->valuen; n++)
-   {
-      value_t *v = &o->values[n];
-      if (v->isobj)
-         dump_obj (v->obj);
-      else if (v->istxt)
-         printf (" \"%s\"", v->txt);
-      else if (v->isnum)
-         printf (" %lf", v->num);
-      else if (v->isbool)
-         printf (" %s", v->bool ? "true" : "false");
-   }
-   printf (")\n");
-}
-
-obj_t *
-find_obj (obj_t * o, const char *tag, obj_t * prev)
-{
-   int n = 0;
-   if (prev)
-      for (; n < o->valuen; n++)
-         if (o->values[n].isobj && o->values[n].obj == prev)
-         {
-            n++;
-            break;
-         }
-   for (; n < o->valuen; n++)
-      if (o->values[n].isobj && !strcmp (o->values[n].obj->tag, tag))
-         return o->values[n].obj;
-   return NULL;
-}
-
-void
-load_pcb (void)
-{
-   int f = open (pcbfile, O_RDONLY);
-   if (f < 0)
-      err (1, "Cannot open %s", pcbfile);
-   struct stat s;
-   if (fstat (f, &s))
-      err (1, "Cannot stat %s", pcbfile);
-   char *data = mmap (NULL, s.st_size, PROT_READ, MAP_PRIVATE, f, 0);
-   if (!data)
-      errx (1, "Cannot access %s", pcbfile);
-   const char *p = data;
-   pcb = parse_obj (&p, data + s.st_size);
-   munmap (data, s.st_size);
-   close (f);
-}
+// Curve delta
 
 void
 copy_file (FILE * o, const char *fn)
@@ -272,9 +60,9 @@ copy_file (FILE * o, const char *fn)
 }
 
 void
-write_scad (void)
+write_scad (pcb_t * pcb)
 {
-   obj_t *o,
+   pcb_t *o,
     *o2,
     *o3;
    /* making scad file */
@@ -287,12 +75,10 @@ write_scad (void)
    if (chdir (modeldir))
       errx (1, "Cannot access model dir %s", modeldir);
 
-   if (strcmp (pcb->tag, "kicad_pcb"))
-      errx (1, "Not a kicad_pcb (%s)", pcb->tag);
-   obj_t *general = find_obj (pcb, "general", NULL);
+   pcb_t *general = pcb_find (pcb, "general", NULL);
    if (general)
    {
-      if ((o = find_obj (general, "thickness", NULL)) && o->valuen == 1 && o->values[0].isnum)
+      if ((o = pcb_find (general, "thickness", NULL)) && o->valuen == 1 && o->values[0].isnum)
          pcbthickness = o->values[0].num;
    }
    fprintf (f, "// Generated case design for %s\n", pcbfile);
@@ -304,7 +90,7 @@ write_scad (void)
       fprintf (f, "// Generated %04d-%02d-%02d %02d:%02d:%02d\n", t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min,
                t.tm_sec);
    }
-   if ((o = find_obj (pcb, "title_block", NULL)))
+   if ((o = pcb_find (pcb, "title_block", NULL)))
       for (int n = 0; n < o->valuen; n++)
          if (o->values[n].isobj && (o2 = o->values[n].obj)->valuen >= 1)
          {
@@ -354,7 +140,7 @@ write_scad (void)
       } *cuts = NULL;
       int cutn = 0;
 
-      void add (obj_t * o, double dx, double dy, double a)
+      void add (pcb_t * o, double dx, double dy, double a)
       {
          void makecuts (double x1, double y1, double xm, double ym, double x2, double y2, int arc)
          {
@@ -398,16 +184,16 @@ write_scad (void)
             cuts[cutn].arc = arc;
             cutn++;
          }
-         obj_t *o2 = find_obj (o, "layer", NULL);
+         pcb_t *o2 = pcb_find (o, "layer", NULL);
          if (!o2 || o2->valuen != 1 || !o2->values[0].istxt || strcmp (o2->values[0].txt, layer))
             return;
-         if (!(o2 = find_obj (o, "end", NULL)) || !o2->values[0].isnum || !o2->values[1].isnum)
+         if (!(o2 = pcb_find (o, "end", NULL)) || !o2->values[0].isnum || !o2->values[1].isnum)
             return;
          double x2 = o2->values[0].num,
             y2 = o2->values[1].num;
-         if (!(o2 = find_obj (o, "start", NULL)) || !o2->values[0].isnum || !o2->values[1].isnum)
+         if (!(o2 = pcb_find (o, "start", NULL)) || !o2->values[0].isnum || !o2->values[1].isnum)
          {
-            if (!(o2 = find_obj (o, "center", NULL)) || o2->valuen != 2 || !o2->values[0].isnum || !o2->values[1].isnum)
+            if (!(o2 = pcb_find (o, "center", NULL)) || o2->valuen != 2 || !o2->values[0].isnum || !o2->values[1].isnum)
                return;          /* not a circle */
             long double cx = o2->values[0].num,
                cy = o2->values[1].num;
@@ -421,7 +207,7 @@ write_scad (void)
          double xm = 0,
             ym = 0;
          char arc = 0;
-         if ((o2 = find_obj (o, "mid", NULL)) && o2->values[0].isnum && o2->values[1].isnum)
+         if ((o2 = pcb_find (o, "mid", NULL)) && o2->values[0].isnum && o2->values[1].isnum)
          {
             arc = 1;
             xm = o2->values[0].num;
@@ -430,16 +216,16 @@ write_scad (void)
          makecuts (x1, y1, xm, ym, x2, y2, arc);
       }
       o = NULL;
-      while ((o = find_obj (pcb, "gr_line", o)))
+      while ((o = pcb_find (pcb, "gr_line", o)))
          add (o, 0, 0, 0);
-      while ((o = find_obj (pcb, "gr_arc", o)))
+      while ((o = pcb_find (pcb, "gr_arc", o)))
          add (o, 0, 0, 0);
-      while ((o = find_obj (pcb, "gr_circle", o)))
+      while ((o = pcb_find (pcb, "gr_circle", o)))
          add (o, 0, 0, 0);
-      obj_t *fp = NULL;
-      while ((fp = find_obj (pcb, "footprint", fp)))
+      pcb_t *fp = NULL;
+      while ((fp = pcb_find (pcb, "footprint", fp)))
       {
-         o2 = find_obj (fp, "at", NULL);
+         o2 = pcb_find (fp, "at", NULL);
          if (!o2 || o2->valuen < 2 || !o2->values[0].isnum || !o2->values[1].isnum)
             continue;
          long double x = o2->values[0].num,
@@ -447,11 +233,11 @@ write_scad (void)
             a = 0;
          if (o2->valuen >= 3 && o2->values[2].isnum)
             a = o2->values[2].num;
-         while ((o = find_obj (fp, "fp_line", o)))
+         while ((o = pcb_find (fp, "fp_line", o)))
             add (o, x, y, a);
-         while ((o = find_obj (fp, "fp_arc", o)))
+         while ((o = pcb_find (fp, "fp_arc", o)))
             add (o, x, y, a);
-         while ((o = find_obj (fp, "fp_circle", o)))
+         while ((o = pcb_find (fp, "fp_circle", o)))
             add (o, x, y, a);
       }
       ry = hy;
@@ -708,10 +494,10 @@ write_scad (void)
    /* The main PCB */
    fprintf (f, "// Populated PCB\nmodule board(pushed=false,hulled=false){\n");
    o = NULL;
-   while ((o = find_obj (pcb, "footprint", o)))
+   while ((o = pcb_find (pcb, "footprint", o)))
    {
       char back = 0;            /* back of board */
-      if (!(o2 = find_obj (o, "layer", NULL)) || o2->valuen != 1 || !o2->values[0].istxt)
+      if (!(o2 = pcb_find (o, "layer", NULL)) || o2->valuen != 1 || !o2->values[0].istxt)
          continue;
       if (!strcmp (o2->values[0].txt, "B.Cu"))
          back = 1;
@@ -719,7 +505,7 @@ write_scad (void)
          continue;
       const char *ref = NULL;
       o2 = NULL;
-      while ((o2 = find_obj (o, "fp_text", o2)))
+      while ((o2 = pcb_find (o, "fp_text", o2)))
       {
          if (o2->valuen >= 2 && o2->values[1].istxt)
          {
@@ -783,7 +569,7 @@ write_scad (void)
          {                      // footprint level 3D
             if (debug && ref)
                warnx ("Module %s %s%s", ref, ref, back ? " (back)" : "");
-            if ((o3 = find_obj (o, "at", NULL)) && o3->valuen >= 2 && o3->values[0].isnum && o3->values[1].isnum)
+            if ((o3 = pcb_find (o, "at", NULL)) && o3->valuen >= 2 && o3->values[0].isnum && o3->values[1].isnum)
             {
                fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num - lx, ry - o3->values[1].num, back ? 0 : pcbthickness);
                if (o3->valuen >= 3 && o3->values[2].isnum)
@@ -800,7 +586,7 @@ write_scad (void)
       }
 
       int id = 0;
-      while ((o2 = find_obj (o, "model", o2)))
+      while ((o2 = pcb_find (o, "model", o2)))
       {
          if (o2->valuen < 1 || !o2->values[0].istxt)
             continue;           /* Not 3D model */
@@ -833,7 +619,7 @@ write_scad (void)
          free (refn);
          if (n >= 0)
          {
-            if ((o3 = find_obj (o, "at", NULL)) && o3->valuen >= 2 && o3->values[0].isnum && o3->values[1].isnum)
+            if ((o3 = pcb_find (o, "at", NULL)) && o3->valuen >= 2 && o3->values[0].isnum && o3->values[1].isnum)
             {
                fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num - lx, ry - o3->values[1].num, back ? 0 : pcbthickness);
                if (o3->valuen >= 3 && o3->values[2].isnum)
@@ -841,14 +627,14 @@ write_scad (void)
             }
             if (back)
                fprintf (f, "rotate([180,0,0])");
-            if ((o3 = find_obj (o2, "offset", NULL)) && (o3 = find_obj (o3, "xyz", NULL)) && o3->valuen >= 3 && o3->values[0].isnum
+            if ((o3 = pcb_find (o2, "offset", NULL)) && (o3 = pcb_find (o3, "xyz", NULL)) && o3->valuen >= 3 && o3->values[0].isnum
                 && o3->values[1].isnum && o3->values[2].isnum && (o3->values[0].num || o3->values[1].num || o3->values[2].num))
                fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num, o3->values[1].num, o3->values[2].num);
-            if ((o3 = find_obj (o2, "scale", NULL)) && (o3 = find_obj (o3, "xyz", NULL)) && o3->valuen >= 3 && o3->values[0].isnum
+            if ((o3 = pcb_find (o2, "scale", NULL)) && (o3 = pcb_find (o3, "xyz", NULL)) && o3->valuen >= 3 && o3->values[0].isnum
                 && o3->values[1].isnum && o3->values[2].isnum && (o3->values[0].num != 1 || o3->values[1].num != 1
                                                                   || o3->values[2].num != 1))
                fprintf (f, "scale([%lf,%lf,%lf])", o3->values[0].num, o3->values[1].num, o3->values[2].num);
-            if ((o3 = find_obj (o2, "rotate", NULL)) && (o3 = find_obj (o3, "xyz", NULL)) && o3->valuen >= 3 && o3->values[0].isnum
+            if ((o3 = pcb_find (o2, "rotate", NULL)) && (o3 = pcb_find (o3, "xyz", NULL)) && o3->valuen >= 3 && o3->values[0].isnum
                 && o3->values[1].isnum && o3->values[2].isnum && (o3->values[0].num || o3->values[1].num || o3->values[2].num))
                fprintf (f, "rotate([%lf,%lf,%lf])", -o3->values[0].num, -o3->values[1].num, -o3->values[2].num);
             fprintf (f, "m%d(pushed,hulled); // %s%s\n", n, modules[n].desc, back ? "" : " (back)");
@@ -947,8 +733,11 @@ main (int argc, const char *argv[])
       if (asprintf (&scadfile, "%.*s.scad", (int) (e - pcbfile), pcbfile) < 0)
          errx (1, "malloc");
    }
-   load_pcb ();
-   write_scad ();
+   pcb_t *pcb = pcb_load (pcbfile);
+   if (strcmp (pcb->tag, "kicad_pcb"))
+      errx (1, "Not a kicad_pcb (%s)", pcb->tag);
+   write_scad (pcb);
+   pcb = pcb_delete (pcb);
 
    poptFreeContext (optCon);
    return 0;
