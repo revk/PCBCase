@@ -99,7 +99,7 @@ parse_obj (const char **pp, const char *e)
       if ((p - t) == 4 && !memcmp (t, "true", (int) (p - t)))
       {
          value->isbool = 1;
-         value->bool = 1;
+         value->istrue = 1;
          continue;;
       }
       if ((p - t) == 5 && !memcmp (t, "false", (int) (p - t)))
@@ -150,6 +150,8 @@ parse_obj (const char **pp, const char *e)
 static void
 pcb_stream (FILE * o, pcb_t * pcb, int l)
 {                               // Write a pcb
+   if (!pcb->tag)
+      return;                   // Marked as delete
    char sub = 0;
    void nl (void)
    {
@@ -210,7 +212,7 @@ pcb_find (pcb_t * pcb, const char *tag, pcb_t * prev)
             break;
          }
    for (; n < pcb->valuen; n++)
-      if (pcb->values[n].isobj && !strcmp (pcb->values[n].obj->tag, tag))
+      if (pcb->values[n].isobj && pcb->values[n].obj->tag && !strcmp (pcb->values[n].obj->tag, tag))
          return pcb->values[n].obj;
    return NULL;
 }
@@ -263,7 +265,7 @@ pcb_append (pcb_t * o)
 
 pcb_val_t *
 pcb_append_num (pcb_t * o, double val)
-{ // Append value num
+{                               // Append value num
    pcb_val_t *v = pcb_append (o);
    v->isnum = 1;
    v->num = val;
@@ -272,7 +274,7 @@ pcb_append_num (pcb_t * o, double val)
 
 pcb_val_t *
 pcb_append_lit (pcb_t * o, const char *val)
-{ // Append value lit
+{                               // Append value lit
    pcb_val_t *v = pcb_append (o);
    v->islit = 1;
    v->txt = add_string (val, NULL);
@@ -281,7 +283,7 @@ pcb_append_lit (pcb_t * o, const char *val)
 
 pcb_val_t *
 pcb_append_txt (pcb_t * o, const char *val)
-{ // Append value txt
+{                               // Append value txt
    pcb_val_t *v = pcb_append (o);
    v->istxt = 1;
    v->txt = add_string (val, NULL);
@@ -290,16 +292,16 @@ pcb_append_txt (pcb_t * o, const char *val)
 
 pcb_val_t *
 pcb_append_bool (pcb_t * o, int val)
-{ // Append value bool
+{                               // Append value bool
    pcb_val_t *v = pcb_append (o);
    v->isbool = 1;
-   v->bool=val;
+   v->istrue = val;
    return v;
 }
 
 pcb_t *
 pcb_append_obj (pcb_t * o, const char *val)
-{ // Append object
+{                               // Append object
    pcb_val_t *v = pcb_append (o);
    v->isobj = 1;
    v->obj = malloc (sizeof (pcb_t));

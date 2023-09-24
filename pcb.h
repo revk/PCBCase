@@ -16,7 +16,7 @@ struct pcb_val_s
       pcb_t *obj;
       double num;
       const char *txt;
-      unsigned char bool:1;
+      unsigned char istrue:1;
    };
 };
 
