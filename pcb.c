@@ -263,7 +263,7 @@ pcb_append (pcb_t * o)
 
 pcb_val_t *
 pcb_append_num (pcb_t * o, double val)
-{
+{ // Append value num
    pcb_val_t *v = pcb_append (o);
    v->isnum = 1;
    v->num = val;
@@ -272,7 +272,7 @@ pcb_append_num (pcb_t * o, double val)
 
 pcb_val_t *
 pcb_append_lit (pcb_t * o, const char *val)
-{
+{ // Append value lit
    pcb_val_t *v = pcb_append (o);
    v->islit = 1;
    v->txt = add_string (val, NULL);
@@ -281,16 +281,25 @@ pcb_append_lit (pcb_t * o, const char *val)
 
 pcb_val_t *
 pcb_append_txt (pcb_t * o, const char *val)
-{
+{ // Append value txt
    pcb_val_t *v = pcb_append (o);
    v->istxt = 1;
    v->txt = add_string (val, NULL);
    return v;
 }
 
+pcb_val_t *
+pcb_append_bool (pcb_t * o, int val)
+{ // Append value bool
+   pcb_val_t *v = pcb_append (o);
+   v->isbool = 1;
+   v->bool=val;
+   return v;
+}
+
 pcb_t *
 pcb_append_obj (pcb_t * o, const char *val)
-{
+{ // Append object
    pcb_val_t *v = pcb_append (o);
    v->isobj = 1;
    v->obj = malloc (sizeof (pcb_t));
@@ -298,7 +307,6 @@ pcb_append_obj (pcb_t * o, const char *val)
    v->obj->tag = add_string (val, NULL);
    return v->obj;
 }
-
 
 pcb_t *
 pcb_free (pcb_t * pcb)
