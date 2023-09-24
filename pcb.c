@@ -87,7 +87,7 @@ parse_obj (const char **pp, const char *e)
          continue;
       }
       t = p;
-      while (p < e && *p != ')' && !isspace(*p))
+      while (p < e && *p != ')' && !isspace (*p))
          p++;
       if (p == e)
          errx (1, "EOF");
@@ -144,40 +144,41 @@ parse_obj (const char **pp, const char *e)
 }
 
 static void
-pcb_stream (FILE * o, pcb_t * pcb,int l)
+pcb_stream (FILE * o, pcb_t * pcb, int l)
 {                               // Write a pcb
-				char sub=0;
-				void nl(void)
-				{
-				fputc('\n',o);
-				for(int q=0;q<l;q++)fputc(' ',o);
-				}
-				if(l)nl();
+   char sub = 0;
+   void nl (void)
+   {
+      fputc ('\n', o);
+      for (int q = 0; q < l; q++)
+         fputc (' ', o);
+   }
+   if (l)
+      nl ();
    fprintf (o, "(%s", pcb->tag);
    for (int n = 0; n < pcb->valuen; n++)
    {
-	   fputc(' ',o);
+      fputc (' ', o);
       pcb_val_t *v = &pcb->values[n];
       if (v->isobj)
       {
-	      sub=1;
-         pcb_stream (o, v->obj,l+1);
-      }
-      else if (v->islit)
+         sub = 1;
+         pcb_stream (o, v->obj, l + 1);
+      } else if (v->islit)
          fprintf (o, "%s", v->txt);
       else if (v->istxt)
          fprintf (o, "\"%s\"", v->txt);
       else if (v->isnum)
       {
-	      if(v->num==round(v->num))
-         fprintf (o, "%.0lf", v->num);
-	      else
-         fprintf (o, "%lf", v->num);
-      }
-      else if (v->isbool)
+         if (v->num == round (v->num))
+            fprintf (o, "%.0lf", v->num);
+         else
+            fprintf (o, "%lf", v->num);
+      } else if (v->isbool)
          fprintf (o, "%s", v->bool ? "true" : "false");
    }
-   if(sub)nl();
+   if (sub)
+      nl ();
    fprintf (o, ")");
 }
 
@@ -189,7 +190,7 @@ pcb_write (const char *pcbfile, pcb_t * pcb)
       o = fopen (pcbfile, "w");
    if (!o)
       errx (1, "Cannot open %s", pcbfile);
-   pcb_stream (o, pcb,0);
+   pcb_stream (o, pcb, 0);
    fclose (o);
 }
 
@@ -232,6 +233,17 @@ pcb_load (const char *pcbfile)
 pcb_t *
 pcb_delete (pcb_t * pcb)
 {                               // Erase PCB (return NULL)
-   // TODO
+   void zap (pcb_t * o)
+   {
+      for (int n = 0; n < o->valuen; n++)
+         if (o->values[n].isobj)
+            zap (o->values[n].obj);
+      free (o->values);
+      free (o);
+   }
+   zap (pcb);
+   for (int n = 0; n < strn; n++)
+      free ((char *) strs[n]);
+   free (strs);
    return NULL;
 }

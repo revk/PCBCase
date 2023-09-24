@@ -27,7 +27,8 @@ struct pcb_s
    pcb_val_t *values;           /* the values */
 };
 
-pcb_t *pcb_load (const char *pcbfile);
-void pcb_write (const char *pcbfile, pcb_t *);
-pcb_t *pcb_find (pcb_t * pcb, const char *tag, pcb_t * prev);
-pcb_t *pcb_delete (pcb_t * pcb);
+pcb_t *pcb_load (const char *pcbfile);	// Load a PCB from file
+void pcb_write (const char *pcbfile, pcb_t *); // Write a PCB to file
+pcb_t *pcb_find (pcb_t * pcb, const char *tag, pcb_t * prev); // Find next object by tag
+pcb_t *pcb_delete (pcb_t * pcb);	// Delete PCB tree when finished
+
