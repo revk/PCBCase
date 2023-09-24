@@ -181,7 +181,7 @@ pcb_stream (FILE * o, pcb_t * pcb, int l)
          else
             fprintf (o, "%lf", v->num);
       } else if (v->isbool)
-         fprintf (o, "%s", v->bool ? "true" : "false");
+         fprintf (o, "%s", v->istrue ? "true" : "false");
    }
    if (sub)
       nl ();
