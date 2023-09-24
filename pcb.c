@@ -18,6 +18,10 @@ static const char **strs = NULL;        /* the object tags */
 static const char *
 add_string (const char *s, const char *e)
 {                               /* allocates a string */
+   if (!s)
+      return NULL;
+   if (!e)
+      e = s + strlen (s);
    /* simplistic */
    int n;
    for (n = 0; n < strn; n++)
@@ -230,18 +234,76 @@ pcb_load (const char *pcbfile)
    return pcb;
 }
 
+void
+pcb_delete (pcb_t * o)
+{
+   pcb_clear (o);
+   free (o);
+}
+
+void
+pcb_clear (pcb_t * o)
+{                               // Clear values in an object
+   for (int n = 0; n < o->valuen; n++)
+      if (o->values[n].isobj)
+         pcb_delete (o->values[n].obj);
+   free (o->values);
+   o->values = NULL;
+   o->valuen = 0;
+}
+
+pcb_val_t *
+pcb_append (pcb_t * o)
+{                               // Create new value
+   int n = o->valuen++;
+   o->values = realloc (o->values, n * sizeof (*o->values));
+   memset (&o->values[n], 0, sizeof (*o->values));
+   return &o->values[n];
+}
+
+pcb_val_t *
+pcb_append_num (pcb_t * o, double val)
+{
+   pcb_val_t *v = pcb_append (o);
+   v->isnum = 1;
+   v->num = val;
+   return v;
+}
+
+pcb_val_t *
+pcb_append_lit (pcb_t * o, const char *val)
+{
+   pcb_val_t *v = pcb_append (o);
+   v->islit = 1;
+   v->txt = add_string (val, NULL);
+   return v;
+}
+
+pcb_val_t *
+pcb_append_txt (pcb_t * o, const char *val)
+{
+   pcb_val_t *v = pcb_append (o);
+   v->istxt = 1;
+   v->txt = add_string (val, NULL);
+   return v;
+}
+
 pcb_t *
-pcb_delete (pcb_t * pcb)
+pcb_append_obj (pcb_t * o, const char *val)
+{
+   pcb_val_t *v = pcb_append (o);
+   v->isobj = 1;
+   v->obj = malloc (sizeof (pcb_t));
+   memset (v->obj, 0, sizeof (pcb_t));
+   v->obj->tag = add_string (val, NULL);
+   return v->obj;
+}
+
+
+pcb_t *
+pcb_free (pcb_t * pcb)
 {                               // Erase PCB (return NULL)
-   void zap (pcb_t * o)
-   {
-      for (int n = 0; n < o->valuen; n++)
-         if (o->values[n].isobj)
-            zap (o->values[n].obj);
-      free (o->values);
-      free (o);
-   }
-   zap (pcb);
+   pcb_delete (pcb);
    for (int n = 0; n < strn; n++)
       free ((char *) strs[n]);
    free (strs);

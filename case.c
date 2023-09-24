@@ -737,7 +737,7 @@ main (int argc, const char *argv[])
    if (strcmp (pcb->tag, "kicad_pcb"))
       errx (1, "Not a kicad_pcb (%s)", pcb->tag);
    write_scad (pcb);
-   pcb = pcb_delete (pcb);
+   pcb = pcb_free (pcb);
 
    poptFreeContext (optCon);
    return 0;
