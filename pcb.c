@@ -256,7 +256,7 @@ pcb_val_t *
 pcb_append (pcb_t * o)
 {                               // Create new value
    int n = o->valuen++;
-   o->values = realloc (o->values, n * sizeof (*o->values));
+   o->values = realloc (o->values, o->valuen * sizeof (*o->values));
    memset (&o->values[n], 0, sizeof (*o->values));
    return &o->values[n];
 }
