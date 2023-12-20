@@ -18,6 +18,10 @@ static const char **strs = NULL;        /* the object tags */
 static const char *
 add_string (const char *s, const char *e)
 {                               /* allocates a string */
+   if (!s)
+      return NULL;
+   if (!e)
+      e = s + strlen (s);
    /* simplistic */
    int n;
    for (n = 0; n < strn; n++)
@@ -87,7 +91,7 @@ parse_obj (const char **pp, const char *e)
          continue;
       }
       t = p;
-      while (p < e && *p != ')' && !isspace(*p))
+      while (p < e && *p != ')' && !isspace (*p))
          p++;
       if (p == e)
          errx (1, "EOF");
@@ -95,7 +99,7 @@ parse_obj (const char **pp, const char *e)
       if ((p - t) == 4 && !memcmp (t, "true", (int) (p - t)))
       {
          value->isbool = 1;
-         value->bool = 1;
+         value->istrue = 1;
          continue;;
       }
       if ((p - t) == 5 && !memcmp (t, "false", (int) (p - t)))
@@ -144,40 +148,43 @@ parse_obj (const char **pp, const char *e)
 }
 
 static void
-pcb_stream (FILE * o, pcb_t * pcb,int l)
+pcb_stream (FILE * o, pcb_t * pcb, int l)
 {                               // Write a pcb
-				char sub=0;
-				void nl(void)
-				{
-				fputc('\n',o);
-				for(int q=0;q<l;q++)fputc(' ',o);
-				}
-				if(l)nl();
+   if (!pcb->tag)
+      return;                   // Marked as delete
+   char sub = 0;
+   void nl (void)
+   {
+      fputc ('\n', o);
+      for (int q = 0; q < l; q++)
+         fputc (' ', o);
+   }
+   if (l)
+      nl ();
    fprintf (o, "(%s", pcb->tag);
    for (int n = 0; n < pcb->valuen; n++)
    {
-	   fputc(' ',o);
+      fputc (' ', o);
       pcb_val_t *v = &pcb->values[n];
       if (v->isobj)
       {
-	      sub=1;
-         pcb_stream (o, v->obj,l+1);
-      }
-      else if (v->islit)
+         sub = 1;
+         pcb_stream (o, v->obj, l + 1);
+      } else if (v->islit)
          fprintf (o, "%s", v->txt);
       else if (v->istxt)
          fprintf (o, "\"%s\"", v->txt);
       else if (v->isnum)
       {
-	      if(v->num==round(v->num))
-         fprintf (o, "%.0lf", v->num);
-	      else
-         fprintf (o, "%lf", v->num);
-      }
-      else if (v->isbool)
-         fprintf (o, "%s", v->bool ? "true" : "false");
+         if (v->num == round (v->num))
+            fprintf (o, "%.0lf", v->num);
+         else
+            fprintf (o, "%lf", v->num);
+      } else if (v->isbool)
+         fprintf (o, "%s", v->istrue ? "true" : "false");
    }
-   if(sub)nl();
+   if (sub)
+      nl ();
    fprintf (o, ")");
 }
 
@@ -189,7 +196,7 @@ pcb_write (const char *pcbfile, pcb_t * pcb)
       o = fopen (pcbfile, "w");
    if (!o)
       errx (1, "Cannot open %s", pcbfile);
-   pcb_stream (o, pcb,0);
+   pcb_stream (o, pcb, 0);
    fclose (o);
 }
 
@@ -205,7 +212,7 @@ pcb_find (pcb_t * pcb, const char *tag, pcb_t * prev)
             break;
          }
    for (; n < pcb->valuen; n++)
-      if (pcb->values[n].isobj && !strcmp (pcb->values[n].obj->tag, tag))
+      if (pcb->values[n].isobj && pcb->values[n].obj->tag && !strcmp (pcb->values[n].obj->tag, tag))
          return pcb->values[n].obj;
    return NULL;
 }
@@ -229,9 +236,86 @@ pcb_load (const char *pcbfile)
    return pcb;
 }
 
+void
+pcb_delete (pcb_t * o)
+{
+   pcb_clear (o);
+   free (o);
+}
+
+void
+pcb_clear (pcb_t * o)
+{                               // Clear values in an object
+   for (int n = 0; n < o->valuen; n++)
+      if (o->values[n].isobj)
+         pcb_delete (o->values[n].obj);
+   free (o->values);
+   o->values = NULL;
+   o->valuen = 0;
+}
+
+pcb_val_t *
+pcb_append (pcb_t * o)
+{                               // Create new value
+   int n = o->valuen++;
+   o->values = realloc (o->values, o->valuen * sizeof (*o->values));
+   memset (&o->values[n], 0, sizeof (*o->values));
+   return &o->values[n];
+}
+
+pcb_val_t *
+pcb_append_num (pcb_t * o, double val)
+{                               // Append value num
+   pcb_val_t *v = pcb_append (o);
+   v->isnum = 1;
+   v->num = val;
+   return v;
+}
+
+pcb_val_t *
+pcb_append_lit (pcb_t * o, const char *val)
+{                               // Append value lit
+   pcb_val_t *v = pcb_append (o);
+   v->islit = 1;
+   v->txt = add_string (val, NULL);
+   return v;
+}
+
+pcb_val_t *
+pcb_append_txt (pcb_t * o, const char *val)
+{                               // Append value txt
+   pcb_val_t *v = pcb_append (o);
+   v->istxt = 1;
+   v->txt = add_string (val, NULL);
+   return v;
+}
+
+pcb_val_t *
+pcb_append_bool (pcb_t * o, int val)
+{                               // Append value bool
+   pcb_val_t *v = pcb_append (o);
+   v->isbool = 1;
+   v->istrue = val;
+   return v;
+}
+
 pcb_t *
-pcb_delete (pcb_t * pcb)
+pcb_append_obj (pcb_t * o, const char *val)
+{                               // Append object
+   pcb_val_t *v = pcb_append (o);
+   v->isobj = 1;
+   v->obj = malloc (sizeof (pcb_t));
+   memset (v->obj, 0, sizeof (pcb_t));
+   v->obj->tag = add_string (val, NULL);
+   return v->obj;
+}
+
+pcb_t *
+pcb_free (pcb_t * pcb)
 {                               // Erase PCB (return NULL)
-   // TODO
+   pcb_delete (pcb);
+   for (int n = 0; n < strn; n++)
+      free ((char *) strs[n]);
+   free (strs);
    return NULL;
 }
