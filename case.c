@@ -493,7 +493,7 @@ write_scad (pcb_t * pcb)
    /* The main PCB */
    for(int side=0;side<2;side++)
    {
-   fprintf (f, "// Populated PCB\nmodule parts_%s(pushed=false,hulled=false){\n",side?"top":"bottom");
+   fprintf (f, "// Parts to go on PCB (%s)\nmodule parts_%s(pushed=false,hulled=false){\n",side?"bottom":"top",side?"bottom":"top");
    o = NULL;
    while ((o = pcb_find (pcb, "footprint", o)))
    {
