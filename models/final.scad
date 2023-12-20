@@ -8,9 +8,11 @@ module boardh(pushed=false)
 		if(!nohull)intersection()
 		{
 			translate([0,0,hullcap-casebase])outline(casebase+pcbthickness+casetop-hullcap*2,-hulledge);
-			hull()board(pushed,true);
+			hull()parts_top(pushed,true);
+			hull()parts_bottom(pushed,true);
 		}
-		board(pushed,false);
+		parts_top(pushed,false);
+		parts_bottom(pushed,false);
 		pcb();
 	}
 }
@@ -29,7 +31,8 @@ module boardf()
 					boardh(true);
 					cylinder(h=height+100,d=margin,$fn=8);
 				}
-				board(false,false);
+				parts_top(false,false);
+				parts_bottom(false,false);
 			}
 		}
 	}
@@ -50,7 +53,8 @@ module boardb()
 					translate([0,0,-height-100])
 					cylinder(h=height+100,d=margin,$fn=8);
 				}
-				board(false,false);
+				parts_top(false,false);
+				parts_bottom(false,false);
 			}
 		}
 	}
@@ -228,9 +232,10 @@ module test()
 	translate([2*spacing,0,0])pcb();
 	translate([3*spacing,0,0])outline();
 	translate([4*spacing,0,0])wall();
-	translate([5*spacing,0,0])board();
-	translate([6*spacing,0,0])board(false,true);
-	translate([7*spacing,0,0])board(true);
+	translate([6*spacing,0,0])parts_top(false,true);
+	translate([6*spacing,0,0])parts_bottom(false,true);
+	translate([7*spacing,0,0])parts_top(true);
+	translate([7*spacing,0,0])parts_bottom(true);
 	translate([8*spacing,0,0])boardh();
 	translate([9*spacing,0,0])boardf();
 	translate([10*spacing,0,0])boardb();

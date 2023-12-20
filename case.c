@@ -1,5 +1,5 @@
 /* Make an OpendScad file from a kicad_pcb file */
-/* (c) 2021-2022 Adrian Kennard Andrews & Arnold Ltd */
+/* (c) 2021-2023 Adrian Kennard Andrews & Arnold Ltd */
 
 #define _GNU_SOURCE
 #include <stdio.h>
@@ -17,7 +17,7 @@
 #include <math.h>
 #include "pcb.h"
 
-/* yet, all globals, what the hell */
+/* yes, all globals, what the hell */
 int debug = 0;
 int norender = 0;
 int layerpcb = 0;
@@ -40,7 +40,6 @@ double spacing = 0;
 double delta = 0.01;
 double hullcap = 1;
 double hulledge = 1;
-// Curve delta
 
 void
 copy_file (FILE * o, const char *fn)
@@ -492,7 +491,9 @@ write_scad (pcb_t * pcb)
    }
 
    /* The main PCB */
-   fprintf (f, "// Populated PCB\nmodule board(pushed=false,hulled=false){\n");
+   for(int side=0;side<2;side++)
+   {
+   fprintf (f, "// Populated PCB\nmodule parts_%s(pushed=false,hulled=false){\n",side?"top":"bottom");
    o = NULL;
    while ((o = pcb_find (pcb, "footprint", o)))
    {
@@ -503,6 +504,7 @@ write_scad (pcb_t * pcb)
          back = 1;
       else if (strcmp (o2->values[0].txt, "F.Cu"))
          continue;
+      if(side!=back)continue;
       const char *ref = NULL;
       o2 = NULL;
       while ((o2 = pcb_find (o, "fp_text", o2)))
@@ -526,12 +528,13 @@ write_scad (pcb_t * pcb)
          else
             r = o->values[0].txt;
          char *fn;
-         if (asprintf (&fn, "%s.scad", r) < 0)
+         if (asprintf (&fn, "%s.scad", r) < 0)	// TODO no .scad
             errx (1, "malloc");
          int n = find_module (&fn, o->values[0].txt ? : ref ? : "-", r);
          int index = 0;
          if (n < 0)
          {                      // Consider parameterised maybe?
+				// TODO any number (with dot number)
             const char *p = r;
             // try to find a likely number...
             for (p = r; *p && (*p != 'x' || !isdigit (p[1])); p++);     // Look for xN
@@ -553,7 +556,7 @@ write_scad (pcb_t * pcb)
                      *O = fn;
                   while (*I && I < fn + pos)
                      *O++ = *I++;
-                  *O++ = '0';
+                  *O++ = '0';	// TODO N not 0, or maybe ℕ
                   while (*I && isdigit (*I))
                      I++;
                   while (*I)
@@ -577,6 +580,7 @@ write_scad (pcb_t * pcb)
             }
             if (back)
                fprintf (f, "rotate([180,0,0])");
+	    // TODO new arguments
             if (modules[n].n && index)
                fprintf (f, "m%d(pushed,hulled,%d); // %s%s\n", n, index, modules[n].desc, back ? "" : " (back)");
             else
@@ -647,6 +651,7 @@ write_scad (pcb_t * pcb)
       }
    }
    fprintf (f, "}\n\n");
+   }
 
    fprintf (f, "module b(cx,cy,z,w,l,h){translate([cx-w/2,cy-l/2,z])cube([w,l,h]);}\n");
 
@@ -662,10 +667,10 @@ write_scad (pcb_t * pcb)
          fprintf (f, "}\n\n");
       }
    /* Final SCAD */
-   copy_file (f, "final.scad");
+   copy_file (f, "final.scad"); // TODO new name?
 
    if (debug)
-      fprintf (f, "board();\n#pcb();\n");
+      fprintf (f, "parts_top();parts_bottom();\n#pcb();\n");
    else if (!norender)
       fprintf (f, "base(); translate([spacing,0,0])top();\n");
 
