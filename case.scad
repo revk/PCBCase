@@ -1,5 +1,7 @@
 // Generate PCB casework
 
+// TODO make need separate "side" and "hole"
+
 height=casebase+pcbthickness+casetop;
 $fn=48;
 
@@ -45,6 +47,44 @@ module bottom_half()
 	translate([-casebase-1,-casewall-1,pcbthickness-height-0.01]) cube([pcbwidth+casewall*2+2,pcblength+casewall*2+2,height]);
 }
 
+module top_cut()
+{
+	difference()
+	{
+		top_half();
+		minkowski()
+		{
+			parts_top(hole=true);
+			rotate([180,0,0])
+			pyramid();
+		}
+	}
+	minkowski()
+	{
+		parts_bottom(hole=true);
+		pyramid();
+	}
+}
+
+module bottom_cut()
+{
+	difference()
+	{
+		bottom_half();
+		minkowski()
+		{
+			parts_bottom(hole=true);
+			pyramid();
+		}
+	}
+	minkowski()
+	{
+		parts_top(hole=true);
+		rotate([180,0,0])
+		pyramid();
+	}
+}
+
 module top_body()
 {
 	difference()
@@ -52,7 +92,7 @@ module top_body()
 		intersection()
 		{
 			solid_case();
-			pcb_hulled(height,0.01);
+			pcb_hulled(height);
 			top_half();
 		}
 		minkowski()
@@ -63,6 +103,7 @@ module top_body()
 		parts_top(hole=true);
 		parts_bottom(part=true);
 	}
+	// TODO block
 }
 
 module top_edge()
@@ -72,15 +113,17 @@ module top_edge()
 		intersection()
 		{
 			solid_case();
-			top_half();
+			top_cut();
 		}
 		pcb_hulled(height);
 		minkowski()
-		{
+		{ // TODO Change to cylinder cut
 			parts_top(part=true,hole=true);
+			parts_bottom(part=true,hole=true);
 			sphere(r=margin,$fn=8);
 		}
 	}
+	// TODO step
 }
 
 module top()
@@ -99,17 +142,18 @@ module bottom_body()
 		intersection()
 		{
 			solid_case();
-			translate([0,0,-height])pcb_hulled(height,0.01);
+			translate([0,0,-height])pcb_hulled(height);
 			bottom_half();
 		}
 		minkowski()
-		{
+		{ // TODO Change to cylinder cut
 			hull()parts_bottom(part=true);
 			translate([0,0,-margin])cylinder(r=margin,h=height,$fn=8);
 		}
 		parts_bottom(hole=true);
 		parts_top(part=true);
 	}
+	// TODO block
 }
 
 module bottom_edge()
@@ -119,15 +163,17 @@ module bottom_edge()
                 intersection()
                 {
                         solid_case();
-                        bottom_half();
+                        bottom_cut();
                 }
-                translate([0,0,-height])pcb_hulled(height+pcbthickness+1);
+                translate([0,0,-height])pcb_hulled(height*2);
                 minkowski()
                 {
+                        parts_top(part=true,hole=true);
                         parts_bottom(part=true,hole=true);
                         sphere(r=margin,$fn=8);
                 }
         }
+	// TODO step
 }
 
 module bottom()
