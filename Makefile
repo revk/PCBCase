@@ -7,4 +7,4 @@ tracklen:	tracklen.c
 	gcc -O -o $@ $< -lpopt -lm -g
 
 PCB/Test/Test.scad:	PCB/Test/Test.kicad_pcb case Makefile
-	./case -o $@ $< -M models --debug
+	./case -o $@ $< -M models
