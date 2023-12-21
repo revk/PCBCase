@@ -1,5 +1,47 @@
+// Generate PCB casework
+
 height=casebase+pcbthickness+casetop;
 $fn=48;
+
+module pyramid()
+{ // A pyramid
+ polyhedron(points=[[0,0,0],[-height,-height,height],[-height,height,height],[height,height,height],[height,-height,height]],faces=[[0,1,2],[0,2,3],[0,3,4],[0,4,1],[4,3,2,1]]);
+}
+
+
+module pcb_hulled(h=pcbthickness,r=0)
+{ // PCB shape for case
+	if(useredge)outline(h,r);
+	else hull()outline(h,r);
+}
+
+module solid_case(d=0)
+{ // The case wall
+	translate([0,0,-casebase-d])
+	{
+		if(useredge)
+			intersection()
+			{
+				pcb(height+d*2,margin/2+d);
+				pcb_hulled(height+d*2,margin/2+d);
+			}
+		else pcb_hulled(height+d*2,margin/2+d);
+	}
+}
+
+module preview()
+{
+	pcb();
+	color("#0f0")parts_top(part=true);
+	color("#0f0")parts_bottom(part=true);
+	color("#f00")parts_top(hole=true);
+	color("#f00")parts_bottom(hole=true);
+	color("#00f")parts_top(block=true);
+	color("#00f")parts_bottom(block=true);
+}
+
+!preview();
+
 
 module boardh(pushed=false)
 { // Board with hulled parts
@@ -78,30 +120,6 @@ module boardm()
  	}
 }
 
-module pcbh(h=pcbthickness,r=0)
-{ // PCB shape for case
-	if(useredge)outline(h,r);
-	else hull()outline(h,r);
-}
-
-module pyramid()
-{ // A pyramid
- polyhedron(points=[[0,0,0],[-height,-height,height],[-height,height,height],[height,height,height],[height,-height,height]],faces=[[0,1,2],[0,2,3],[0,3,4],[0,4,1],[4,3,2,1]]);
-}
-
-module wall(d=0)
-{ // The case wall
-	translate([0,0,-casebase-d])
-	{
-		if(useredge)
-			intersection()
-			{
-				pcb(height+d*2,margin/2+d);
-				pcbh(height+d*2,margin/2+d);
-			}
-		else pcbh(height+d*2,margin/2+d);
-	}
-}
 
 module cutf()
 { // This cut up from base in the wall
@@ -111,7 +129,7 @@ module cutf()
 		difference()
 		{
 			translate([-casewall+0.01,-casewall+0.01,-casebase+0.01])cube([pcbwidth+casewall*2-0.02,pcblength+casewall*2-0.02,casebase+overlap+lip]);
-			wall();
+			solid_case();
 			boardb();
 		}
 	}
@@ -125,7 +143,7 @@ module cutb()
 		difference()
 		{
 			translate([-casewall+0.01,-casewall+0.01,0.01])cube([pcbwidth+casewall*2-0.02,pcblength+casewall*2-0.02,casetop+pcbthickness]);
-			wall();
+			solid_case();
 			boardf();
 		}
 	}
@@ -144,7 +162,7 @@ module cutpf()
 		difference()
 		{
 			translate([-casewall-0.01,-casewall-0.01,-casebase-0.01])cube([pcbwidth+casewall*2+0.02,pcblength+casewall*2+0.02,casebase+overlap+lip+0.02]);
-			wall();
+			solid_case();
 			boardh(true);
 		}
 		translate([-casewall,-casewall,-casebase])case();
@@ -164,7 +182,7 @@ module cutpb()
 		difference()
 		{
 			translate([-casewall-0.01,-casewall-0.01,-0.01])cube([pcbwidth+casewall*2+0.02,pcblength+casewall*2+0.02,casetop+pcbthickness+0.02]);
-			wall();
+			solid_case();
 			boardh(true);
 		}
 		translate([-casewall,-casewall,-casebase])case();
@@ -175,14 +193,14 @@ module case()
 { // The basic case
 	hull()
 	{
-		translate([casewall,casewall,0])pcbh(height,casewall-edge);
-		translate([casewall,casewall,edge])pcbh(height-edge*2,casewall);
+		translate([casewall,casewall,0])pcb_hulled(height,casewall-edge);
+		translate([casewall,casewall,edge])pcb_hulled(height-edge*2,casewall);
 	}
 }
 
 module cut(d=0)
 { // The cut point in the wall
-	translate([casewall,casewall,casebase+lip])pcbh(casetop+pcbthickness-lip+1,casewall/2+d/2+margin/4);
+	translate([casewall,casewall,casebase+lip])pcb_hulled(casetop+pcbthickness-lip+1,casewall/2+d/2+margin/4);
 }
 
 module base()
@@ -231,7 +249,7 @@ module test()
 	translate([1*spacing,0,0])top();
 	translate([2*spacing,0,0])pcb();
 	translate([3*spacing,0,0])outline();
-	translate([4*spacing,0,0])wall();
+	translate([4*spacing,0,0])solid_case();
 	translate([6*spacing,0,0])parts_top(false,true);
 	translate([6*spacing,0,0])parts_bottom(false,true);
 	translate([7*spacing,0,0])parts_top(true);

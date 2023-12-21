@@ -1,6 +1,6 @@
 all:	case tracklen PCB/Test/Test.scad
 
-case:	case.c pcb.c models models/final.scad
+case:	case.c pcb.c models case.scad
 	gcc -O -o $@ $< pcb.c -lpopt -lm -g
 
 tracklen:	tracklen.c

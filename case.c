@@ -429,43 +429,72 @@ write_scad (pcb_t * pcb)
    {
       char *filename;           // Filename (malloc)
       char *desc;               // Description (malloc)
-      unsigned char ok:1;       // If file exists
       unsigned char n:1;        // If module expects n parameter
    } *modules = NULL;
    int modulen = 0;
 
-   int find_module (char **fnp, const char *a, const char *b)
+   int find_module (const char *fn, const char *a, const char *b)
    {                            // Find a module by filename, and return number, <0 for failed (including file not existing)
-      char *fn = *fnp;
-      *fnp = NULL;
       int n;
       for (n = 0; n < modulen; n++)
          if (!strcmp (modules[n].filename, fn))
             break;
       if (n < modulen)
-      {
-         if (!modules[n].ok)
-            return -1;
          return n;
-      }
+      if(access(fn,R_OK))
+	      return -1;
       modules = realloc (modules, (++modulen) * sizeof (*modules));
       if (!modules)
          errx (1, "malloc");
       memset (modules + n, 0, sizeof (*modules));
-      modules[n].filename = fn;
+      modules[n].filename = strdup(fn);
+      if(!b)modules[n].desc=strdup(a);
+      else
       if (asprintf (&modules[n].desc, "%s %s", a, b) < 0)
          errx (1, "malloc");
-      if (access (modules[n].filename, R_OK))
-      {
-         if (debug)
-            warnx ("Not found %s %s %s", fn, a, b);
-         return -1;
-      }
-      modules[n].ok = 1;
       if (debug)
          warnx ("New module %s %s %s", fn, a, b);
       return n;
    }
+      int add_module(const char *fn,const char *a,const char *b,char **numberp)
+      { // Check module with substitution for ℕ
+	const char *f=fn;
+	while(*f)
+	{
+		while(*f&&!isdigit(*f))f++;
+		if(!*f)break;
+		char *new=NULL;
+		size_t len=0;
+		FILE *o=open_memstream(&new,&len);
+		const char *q=fn;
+		while(q<f)fputc(*q++,o);
+		fprintf(o,"ℕ");
+		while(isdigit(*f))f++;
+		if(*f=='.')
+		{
+			f++;
+			while(isdigit(*f))f++;
+		}
+		if(numberp)
+		{
+			*numberp=NULL;
+			size_t len;
+			FILE *o=open_memstream(numberp,&len);
+			while(q<f)fputc(*q++,o);
+fclose(o);
+		}
+		while(*q)fputc(*q++,o);
+		fclose(o);
+		int n=find_module(new,a,b);
+		free(new);
+		if(n>=0)
+		{
+			modules[n].n=1;
+			return n;
+		}
+	}
+	return find_module(fn,a,b);
+      }
 
    const char *checkignore (const char *ref)
    {
@@ -493,7 +522,7 @@ write_scad (pcb_t * pcb)
    /* The main PCB */
    for(int side=0;side<2;side++)
    {
-   fprintf (f, "// Parts to go on PCB (%s)\nmodule parts_%s(pushed=false,hulled=false){\n",side?"bottom":"top",side?"bottom":"top");
+   fprintf (f, "// Parts to go on PCB (%s)\nmodule parts_%s(part=false,hole=false,block=false){\n",side?"bottom":"top",side?"bottom":"top");
    o = NULL;
    while ((o = pcb_find (pcb, "footprint", o)))
    {
@@ -505,11 +534,12 @@ write_scad (pcb_t * pcb)
       else if (strcmp (o2->values[0].txt, "F.Cu"))
          continue;
       if(side!=back)continue;
+      // Find part reference
       const char *ref = NULL;
       o2 = NULL;
       while ((o2 = pcb_find (o, "fp_text", o2)))
       {
-         if (o2->valuen >= 2 && o2->values[1].istxt)
+         if (o2->valuen >= 2 && o2->values[0].islit && !strcmp(o2->values[0].txt,"reference")&&o2->values[1].istxt)
          {
             ref = o2->values[1].txt;
             break;
@@ -519,57 +549,38 @@ write_scad (pcb_t * pcb)
          continue;
       o2 = NULL;
 
-      // Footprint level
-      if (o->valuen >= 1 && o->values[0].istxt)
+      int n=-1;
+      char *index=NULL;
+
+       { // LCSC Part #
+	const char *lcsc=NULL;
+      o2 = NULL;
+      while ((o2 = pcb_find (o, "property", o2)))
       {
-         const char *r = strchr (o->values[0].txt, ':');
-         if (r)
-            r++;
-         else
-            r = o->values[0].txt;
-         char *fn;
-         if (asprintf (&fn, "%s.scad", r) < 0)	// TODO no .scad
-            errx (1, "malloc");
-         int n = find_module (&fn, o->values[0].txt ? : ref ? : "-", r);
-         int index = 0;
-         if (n < 0)
-         {                      // Consider parameterised maybe?
-				// TODO any number (with dot number)
-            const char *p = r;
-            // try to find a likely number...
-            for (p = r; *p && (*p != 'x' || !isdigit (p[1])); p++);     // Look for xN
-            if (!*p)
-               for (p = r; *p && (*p != '-' || !isdigit (p[1])); p++);  // Look for -N
-            if (!*p)
-               for (p = r; *p && (*p != '_' || !isdigit (p[1])); p++);  // Look for _N
-            if (*p)
-            {
-               p++;
-               int pos = (p - r);
-               while (isdigit (*p))
-                  index = index * 10 + (*p++) - '0';
-               if (index)
-               {                // Make filename
-                  if (asprintf (&fn, "%s.scad", r) < 0)
-                     errx (1, "malloc");
-                  char *I = fn,
-                     *O = fn;
-                  while (*I && I < fn + pos)
-                     *O++ = *I++;
-                  *O++ = '0';	// TODO N not 0, or maybe ℕ
-                  while (*I && isdigit (*I))
-                     I++;
-                  while (*I)
-                     *O++ = *I++;
-                  *O = 0;
-                  n = find_module (&fn, o->values[0].txt ? : ref ? : "-", r);
-                  if (n >= 0)
-                     modules[n].n = 1;
-               }
-            }
+         if (o2->valuen >= 2 && o2->values[0].istxt && !strcmp(o2->values[0].txt,"LCSC Part #")&&o2->values[1].istxt)
+         {
+            lcsc = o2->values[1].txt;
+            break;
          }
+	 if(lcsc)
+	 n=find_module(lcsc,ref,NULL);// No number expanding on this
+      }
+       }
+	
+      // Footprint
+      const char *footprint=NULL;
+      if (n<0&&o->valuen >= 1 && o->values[0].istxt)
+      {
+         footprint = strchr (o->values[0].txt, ':');
+         if (footprint)
+            footprint++;
+         else
+            footprint = o->values[0].txt;
+	 n=add_module(footprint,ref,NULL,&index);
+      }
+
          if (n >= 0)
-         {                      // footprint level 3D
+         {                      // footprint level orientation
             if (debug && ref)
                warnx ("Module %s %s%s", ref, ref, back ? " (back)" : "");
             if ((o3 = pcb_find (o, "at", NULL)) && o3->valuen >= 2 && o3->values[0].isnum && o3->values[1].isnum)
@@ -580,15 +591,15 @@ write_scad (pcb_t * pcb)
             }
             if (back)
                fprintf (f, "rotate([180,0,0])");
-	    // TODO new arguments
             if (modules[n].n && index)
-               fprintf (f, "m%d(pushed,hulled,%d); // %s%s\n", n, index, modules[n].desc, back ? "" : " (back)");
+               fprintf (f, "m%d(part,hole,block,%s); // %s%s\n", n, index, modules[n].desc, back ? "" : " (back)");
             else
-               fprintf (f, "m%d(pushed,hulled); // %s%s\n", n, modules[n].desc, back ? "" : " (back)");
+               fprintf (f, "m%d(part,hole,block); // %s%s\n", n, modules[n].desc, back ? "" : " (back)");
             continue;
          }
-      }
+	    free(index);
 
+	 // Add 3D models
       int id = 0;
       while ((o2 = pcb_find (o, "model", o2)))
       {
@@ -606,23 +617,22 @@ write_scad (pcb_t * pcb)
          char *e = strrchr (model, '.');
          if (e)
             *e = 0;
-         char *fn;
-         if (asprintf (&fn, "%s.scad", leaf) < 0)
-            errx (1, "malloc");
-         int n = find_module (&fn, o->values[0].txt ? : ref ? : "-", leaf);
+         int q = add_module (leaf, o->values[0].txt ? : ref ? : "-", leaf,&index);
          char *refn;
          if (asprintf (&refn, "%s.%d", ref, id) < 0)
             errx (1, "malloc");
          if (checkignore (refn))
          {
             free (refn);
+	    free(index);
             continue;
          }
          if (debug && ref)
             warnx ("Module %s.%d %s%s", ref, id, leaf, back ? " (back)" : "");
          free (refn);
-         if (n >= 0)
-         {
+         if (q >= 0)
+         { // Model orientation
+		 n=q;
             if ((o3 = pcb_find (o, "at", NULL)) && o3->valuen >= 2 && o3->values[0].isnum && o3->values[1].isnum)
             {
                fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num - lx, ry - o3->values[1].num, back ? 0 : pcbthickness);
@@ -641,14 +651,19 @@ write_scad (pcb_t * pcb)
             if ((o3 = pcb_find (o2, "rotate", NULL)) && (o3 = pcb_find (o3, "xyz", NULL)) && o3->valuen >= 3 && o3->values[0].isnum
                 && o3->values[1].isnum && o3->values[2].isnum && (o3->values[0].num || o3->values[1].num || o3->values[2].num))
                fprintf (f, "rotate([%lf,%lf,%lf])", -o3->values[0].num, -o3->values[1].num, -o3->values[2].num);
-            fprintf (f, "m%d(pushed,hulled); // %s%s\n", n, modules[n].desc, back ? "" : " (back)");
+	                if (modules[n].n && index)
+            fprintf (f, "m%d(part,hole,block,%s); // %s%s\n", n, index,modules[n].desc, back ? "" : " (back)");
+			else
+            fprintf (f, "m%d(part,hole,block); // %s%s\n", n, modules[n].desc, back ? "" : " (back)");
          } else
          {
-            fprintf (f, "// Missing %s.%d %s%s\n", ref, id, leaf, back ? " (back)" : "");
+            fprintf (f, "// Missing model %s.%d %s%s\n", ref, id, leaf, back ? " (back)" : "");
             warnx ("Missing %s.%d %s%s", ref, id, leaf, back ? " (back)" : "");
          }
-         free (model);
+	 free(model);
+	    free(index);
       }
+      if(n<0)warnx("Missing part %s %s",ref,footprint);
    }
    fprintf (f, "}\n\n");
    }
@@ -657,17 +672,17 @@ write_scad (pcb_t * pcb)
 
    /* Used models */
    for (int n = 0; n < modulen; n++)
-      if (modules[n].ok)
       {
          if (modules[n].n)
-            fprintf (f, "module m%d(pushed=false,hulled=false,n=0)\n{ // %s\n", n, modules[n].desc);
+            fprintf (f, "module m%d(part=false,hole=false,block=false,N=0)\n{ // %s\n", n, modules[n].desc);
          else
-            fprintf (f, "module m%d(pushed=false,hulled=false)\n{ // %s\n", n, modules[n].desc);
+            fprintf (f, "module m%d(part=false,hole=false,block=false)\n{ // %s\n", n, modules[n].desc);
          copy_file (f, modules[n].filename);
          fprintf (f, "}\n\n");
       }
+
    /* Final SCAD */
-   copy_file (f, "final.scad"); // TODO new name?
+   copy_file (f, "../case.scad");
 
    if (debug)
       fprintf (f, "parts_top();parts_bottom();\n#pcb();\n");

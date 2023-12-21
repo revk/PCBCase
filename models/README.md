@@ -7,11 +7,16 @@ The `models` directory contains models for the parts. These are OpenSCAD code to
 For each part a file name is found for the necessary OpenSCAD code. This is done by checking a number of possible filenames until one if found.
 
 - If there is an `LCSC Part #`, then this is checked. e.g. `C265103`
-- The part value is checked, e.g. `1x5`
-- The 3D model name is checked, without directory and suffix. E.g. `${KICAD6_3DMODEL_DIR}/Connector_JST.3dshapes/JST_EH_S5B-EH_1x05_P2.50mm_Horizontal.wrl` looks for `JST_EH_S5B-EH_1x05_P2.50mm_Horizontal.wrl`, but first, each number found is replaced by `N` to look for a generic model, e.g. `JST_EH_SNB-EH_1x05_P2.50mm_Horizontal.wrl`, `JST_EH_S5B-EH_Nx05_P2.50mm_Horizontal.wrl`, `JST_EH_S5B-EH_1xN_P2.50mm_Horizontal.wrl`, and `JST_EH_S5B-EH_1x05_PNmm_Horizontal.wrl`.
-- The footprint is checked exactly, without prefix, e.g. `JST_EH_S5B-EH_1x05_P2.50mm_Horizontal.wrl`
+- The footprint is checked exactly, without prefix, e.g. `RevK:JST_EH_S5B-EH_1x05_P2.50mm_Horizontal` will check for `JST_EH_S5B-EH_1x05_P2.50mm_Horizontal`
+- If neither of those matched, then the name of each 3D model is processed (all of them, not just the first) isong the filename without directory or suffix, e.g. `${KICAD6_3DMODEL_DIR}/Connector_JST.3dshapes/JST_EH_S5B-EH_1x05_P2.50mm_Horizontal.wrl` would check `JST_EH_S5B-EH_1x05_P2.50mm_Horizontal`.
 
-Note that `final.scad` is the SCAD code to make the case.
+In any case, when checking a filename (apart from the LCSC Part), any numbers in the filename are replaced with `ℕ`, e.g. for `JST_EH_S5B-EH_1x05_P2.50mm_Horizontal` the filenames checked are as follows, matching the first one found.
+
+- `JST_EH_SℕB-EH_1x05_P2.50mm_Horizontal`
+- `JST_EH_S5B-EH_ℕx05_P2.50mm_Horizontal`
+- `JST_EH_S5B-EH_1xℕ_P2.50mm_Horizontal`
+- `JST_EH_S5B-EH_1x05_Pℕmm_Horizontal`
+- `JST_EH_S5B-EH_1x05_P2.50mm_Horizontal`
 
 ## How OpenSCAD is called
 
@@ -42,4 +47,4 @@ Obviously only some parts need a hole.
 
 The `block` is rarely used. It provides for a part of the case that must be present. It is added after the cavity is create, but before any holes. One use cases are a channel/tube around a hole for an LED in the top of the case, but this has to allow clear space on the PCB for the channel as adjacent parts won't cut in to the channel. Another use case is something like a tamper switch where a part of the case has to be present to press on the switch.
 
-The block has to be big enough for any sensible sie of case, it is truncated so it is within the case.
+The block has to be big enough for any sensible size of case, it is truncated so it is within the case.
