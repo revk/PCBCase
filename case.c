@@ -685,9 +685,9 @@ fclose(o);
    copy_file (f, "../case.scad");
 
    if (debug)
-      fprintf (f, "parts_top();parts_bottom();\n#pcb();\n");
+      fprintf (f, "preview();\n");
    else if (!norender)
-      fprintf (f, "base(); translate([spacing,0,0])top();\n");
+      fprintf (f, "bottom(); translate([spacing,0,0])top();\n");
 
    if (f != stdout)
       fclose (f);
