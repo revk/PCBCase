@@ -522,6 +522,7 @@ fclose(o);
    /* The main PCB */
    for(int side=0;side<2;side++)
    {
+   int count=0;
    fprintf (f, "// Parts to go on PCB (%s)\nmodule parts_%s(part=false,hole=false,block=false){\n",side?"bottom":"top",side?"bottom":"top");
    o = NULL;
    while ((o = pcb_find (pcb, "footprint", o)))
@@ -595,6 +596,7 @@ fclose(o);
                fprintf (f, "m%d(part,hole,block,%s); // %s%s\n", n, index, modules[n].desc, back ? "" : " (back)");
             else
                fprintf (f, "m%d(part,hole,block); // %s%s\n", n, modules[n].desc, back ? "" : " (back)");
+	    count++;
             continue;
          }
 	    free(index);
@@ -655,6 +657,7 @@ fclose(o);
             fprintf (f, "m%d(part,hole,block,%s); // %s%s\n", n, index,modules[n].desc, back ? "" : " (back)");
 			else
             fprintf (f, "m%d(part,hole,block); // %s%s\n", n, modules[n].desc, back ? "" : " (back)");
+      if(n<0)warnx("Missing part %s %s",ref,footprint);
          } else
          {
             fprintf (f, "// Missing model %s.%d %s%s\n", ref, id, leaf, back ? " (back)" : "");
@@ -663,9 +666,9 @@ fclose(o);
 	 free(model);
 	    free(index);
       }
-      if(n<0)warnx("Missing part %s %s",ref,footprint);
    }
    fprintf (f, "}\n\n");
+   fprintf (f, "parts_%s=%d;\n",side?"bottom":"top",count);
    }
 
    fprintf (f, "module b(cx,cy,z,w,l,h){translate([cx-w/2,cy-l/2,z])cube([w,l,h]);}\n");
@@ -711,7 +714,6 @@ main (int argc, const char *argv[])
          {"hull-edge", 3, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &hulledge, 0, "Hull edge", "mm"},
          {"no-hull", 'h', POPT_ARG_NONE, &nohull, 0, "No hull on parts"},
          {"margin", 'm', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &margin, 0, "margin", "mm"},
-         {"overlap", 'O', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &overlap, 0, "overlap", "mm"},
          {"lip", 0, POPT_ARG_DOUBLE, &lip, 0, "lip offset (default pcbthickness/2)", "mm"},
          {"pcb", 0, POPT_ARG_INT, &layerpcb, 0, "Use User.N as PCB border instead of Edge.Cuts", "N"},
          {"case", 0, POPT_ARG_INT, &layercase, 0, "Use User.N as case border instead of pcb", "N"},

@@ -1,7 +1,5 @@
 // Generate PCB casework
 
-// TODO make need separate "side" and "hole"
-
 height=casebase+pcbthickness+casetop;
 $fn=48;
 
@@ -39,12 +37,57 @@ module preview()
 
 module top_half()
 {
-	translate([-casebase-1,-casewall-1,pcbthickness+0.01]) cube([pcbwidth+casewall*2+2,pcblength+casewall*2+2,height]);
+	difference()
+	{
+		translate([-casebase-100,-casewall-100,pcbthickness-lip/2+0.01]) cube([pcbwidth+casewall*2+200,pcblength+casewall*2+200,height]);
+		translate([0,0,pcbthickness-lip/2-0.01])pcb_hulled(lip,casewall/2+fit);
+	}
 }
 
 module bottom_half()
 {
-	translate([-casebase-1,-casewall-1,pcbthickness-height-0.01]) cube([pcbwidth+casewall*2+2,pcblength+casewall*2+2,height]);
+	translate([-casebase-100,-casewall-100,pcbthickness+lip/2-height-0.01]) cube([pcbwidth+casewall*2+200,pcblength+casewall*2+200,height]);
+	translate([0,0,pcbthickness-lip/2])pcb_hulled(lip,casewall/2-fit);
+}
+
+module case_wall()
+{
+	difference()
+	{
+		solid_case();
+		translate([0,0,-height])pcb_hulled(height*2);
+	}
+}
+
+module top_side_hole()
+{
+	intersection()
+	{
+		parts_top(hole=true);
+		case_wall();
+	}
+}
+
+module bottom_side_hole()
+{
+	intersection()
+	{
+		parts_bottom(hole=true);
+		case_wall();
+	}
+}
+
+module parts_space()
+{
+	minkowski()
+	{
+		union()
+		{
+			parts_top(part=true,hole=true);
+			parts_bottom(part=true,hole=true);
+		}
+		sphere(r=margin,$fn=6);
+	}
 }
 
 module top_cut()
@@ -52,17 +95,33 @@ module top_cut()
 	difference()
 	{
 		top_half();
-		minkowski()
+		if(parts_top)difference()
 		{
-			parts_top(hole=true);
-			rotate([180,0,0])
-			pyramid();
+			minkowski()
+			{ // Penetrating side holes
+				top_side_hole();
+				rotate([180,0,0])
+				pyramid();
+			}
+			minkowski()
+			{
+				top_side_hole();
+				cylinder(d=margin,h=height,$fn=4);
+			}
 		}
 	}
-	minkowski()
+	if(parts_bottom)difference()
 	{
-		parts_bottom(hole=true);
-		pyramid();
+		minkowski()
+		{ // Penetrating side holes
+			bottom_side_hole();
+			pyramid();
+		}
+			minkowski()
+			{
+				bottom_side_hole();
+				translate([0,0,-height])cylinder(d=margin,h=height,$fn=4);
+			}
 	}
 }
 
@@ -70,18 +129,8 @@ module bottom_cut()
 {
 	difference()
 	{
-		bottom_half();
-		minkowski()
-		{
-			parts_bottom(hole=true);
-			pyramid();
-		}
-	}
-	minkowski()
-	{
-		parts_top(hole=true);
-		rotate([180,0,0])
-		pyramid();
+		 translate([-casebase-50,-casewall-50,-height]) cube([pcbwidth+casewall*2+100,pcblength+casewall*2+100,height*2]);
+		 top_cut();
 	}
 }
 
@@ -95,15 +144,18 @@ module top_body()
 			pcb_hulled(height);
 			top_half();
 		}
-		minkowski()
+		if(parts_top)minkowski()
 		{
 			hull()parts_top(part=true);
 			translate([0,0,margin-height])cylinder(r=margin,h=height,$fn=8);
 		}
-		parts_top(hole=true);
-		parts_bottom(part=true);
+		parts_space();
 	}
-	// TODO block
+	intersection()
+	{
+		solid_case();
+		parts_top(block=true);
+	}
 }
 
 module top_edge()
@@ -112,18 +164,11 @@ module top_edge()
 	{
 		intersection()
 		{
-			solid_case();
+			case_wall();
 			top_cut();
 		}
-		pcb_hulled(height);
-		minkowski()
-		{ // TODO Change to cylinder cut
-			parts_top(part=true,hole=true);
-			parts_bottom(part=true,hole=true);
-			sphere(r=margin,$fn=8);
-		}
+		parts_space();
 	}
-	// TODO step
 }
 
 module top()
@@ -145,15 +190,18 @@ module bottom_body()
 			translate([0,0,-height])pcb_hulled(height);
 			bottom_half();
 		}
-		minkowski()
-		{ // TODO Change to cylinder cut
+		if(parts_bottom)minkowski()
+		{
 			hull()parts_bottom(part=true);
 			translate([0,0,-margin])cylinder(r=margin,h=height,$fn=8);
 		}
-		parts_bottom(hole=true);
-		parts_top(part=true);
+		parts_space();
 	}
-	// TODO block
+	intersection()
+	{
+		solid_case();
+		parts_bottom(block=true);
+	}
 }
 
 module bottom_edge()
@@ -162,18 +210,11 @@ module bottom_edge()
         {
                 intersection()
                 {
-                        solid_case();
+                        case_wall();
                         bottom_cut();
                 }
-                translate([0,0,-height])pcb_hulled(height*2);
-                minkowski()
-                {
-                        parts_top(part=true,hole=true);
-                        parts_bottom(part=true,hole=true);
-                        sphere(r=margin,$fn=8);
-                }
+		parts_space();
         }
-	// TODO step
 }
 
 module bottom()
