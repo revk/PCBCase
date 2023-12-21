@@ -146,7 +146,8 @@ module top_body()
 		}
 		if(parts_top)minkowski()
 		{
-			hull()parts_top(part=true);
+			if(nohull)parts_top(part=true);
+			else hull()parts_top(part=true);
 			translate([0,0,margin-height])cylinder(r=margin,h=height,$fn=8);
 		}
 		parts_space();
@@ -192,7 +193,8 @@ module bottom_body()
 		}
 		if(parts_bottom)minkowski()
 		{
-			hull()parts_bottom(part=true);
+			if(nohull)parts_bottom(part=true);
+			else hull()parts_bottom(part=true);
 			translate([0,0,-margin])cylinder(r=margin,h=height,$fn=8);
 		}
 		parts_space();
@@ -225,7 +227,3 @@ module bottom()
         	bottom_edge();
 	}
 }
-
-
-
-translate([spacing*2,0,0])preview();

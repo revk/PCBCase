@@ -31,8 +31,7 @@ double pcbthickness = 0;
 double casebase = 5;
 double casetop = 5;
 double casewall = 3;            /* margin/2 eats in to this  */
-double overlap = 2;             /* Lip overlap */
-double lip = 0;                 /* Lip offset */
+double lip = 2;                 /* Lip offset */
 double fit = 0.0;
 double edge = 1;
 double margin = 0.5;
@@ -101,7 +100,6 @@ write_scad (pcb_t * pcb)
    fprintf (f, "//\n\n");
    fprintf (f, "// Globals\n");
    fprintf (f, "margin=%lf;\n", margin);
-   fprintf (f, "overlap=%lf;\n", overlap);
    fprintf (f, "lip=%lf;\n", lip);
    fprintf (f, "casebase=%lf;\n", casebase);
    fprintf (f, "casetop=%lf;\n", casetop);
@@ -714,7 +712,7 @@ main (int argc, const char *argv[])
          {"hull-edge", 3, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &hulledge, 0, "Hull edge", "mm"},
          {"no-hull", 'h', POPT_ARG_NONE, &nohull, 0, "No hull on parts"},
          {"margin", 'm', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &margin, 0, "margin", "mm"},
-         {"lip", 0, POPT_ARG_DOUBLE, &lip, 0, "lip offset (default pcbthickness/2)", "mm"},
+         {"lip", 0, POPT_ARG_DOUBLE|POPT_ARGFLAG_SHOW_DEFAULT, &lip, 0, "lip offset", "mm"},
          {"pcb", 0, POPT_ARG_INT, &layerpcb, 0, "Use User.N as PCB border instead of Edge.Cuts", "N"},
          {"case", 0, POPT_ARG_INT, &layercase, 0, "Use User.N as case border instead of pcb", "N"},
          {"pcb-thickness", 'T', POPT_ARG_DOUBLE, &pcbthickness, 0, "PCB thickness (default: auto)", "mm"},
