@@ -210,7 +210,7 @@ module bottom_edge()
 	intersection()
 	{
 		case_wall();
-       		bottom_cut();
+		bottom_cut();
 	}
 }
 
