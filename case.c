@@ -439,60 +439,67 @@ write_scad (pcb_t * pcb)
             break;
       if (n < modulen)
          return n;
-      if(access(fn,R_OK))
-	      return -1;
+      if (access (fn, R_OK))
+         return -1;
       modules = realloc (modules, (++modulen) * sizeof (*modules));
       if (!modules)
          errx (1, "malloc");
       memset (modules + n, 0, sizeof (*modules));
-      modules[n].filename = strdup(fn);
-      if(!b)modules[n].desc=strdup(a);
-      else
-      if (asprintf (&modules[n].desc, "%s %s", a, b) < 0)
+      modules[n].filename = strdup (fn);
+      if (!b)
+         modules[n].desc = strdup (a);
+      else if (asprintf (&modules[n].desc, "%s %s", a, b) < 0)
          errx (1, "malloc");
       if (debug)
          warnx ("New module %s %s %s", fn, a, b);
       return n;
    }
-      int add_module(const char *fn,const char *a,const char *b,char **numberp)
-      { // Check module with substitution for ℕ
-	const char *f=fn;
-	while(*f)
-	{
-		while(*f&&!isdigit(*f))f++;
-		if(!*f)break;
-		char *new=NULL;
-		size_t len=0;
-		FILE *o=open_memstream(&new,&len);
-		const char *q=fn;
-		while(q<f)fputc(*q++,o);
-		fprintf(o,"ℕ");
-		while(isdigit(*f))f++;
-		if(*f=='.')
-		{
-			f++;
-			while(isdigit(*f))f++;
-		}
-		if(numberp)
-		{
-			*numberp=NULL;
-			size_t len;
-			FILE *o=open_memstream(numberp,&len);
-			while(q<f)fputc(*q++,o);
-fclose(o);
-		}
-		while(*q)fputc(*q++,o);
-		fclose(o);
-		int n=find_module(new,a,b);
-		free(new);
-		if(n>=0)
-		{
-			modules[n].n=1;
-			return n;
-		}
-	}
-	return find_module(fn,a,b);
+   int add_module (const char *fn, const char *a, const char *b, char **numberp)
+   {                            // Check module with substitution for ℕ
+      const char *f = fn;
+      while (*f)
+      {
+         while (*f && !isdigit (*f))
+            f++;
+         if (!*f)
+            break;
+         char *new = NULL;
+         size_t len = 0;
+         FILE *o = open_memstream (&new, &len);
+         const char *q = fn;
+         while (q < f)
+            fputc (*q++, o);
+         fprintf (o, "ℕ");
+         while (isdigit (*f))
+            f++;
+         if (*f == '.')
+         {
+            f++;
+            while (isdigit (*f))
+               f++;
+         }
+         if (numberp)
+         {
+            *numberp = NULL;
+            size_t len;
+            FILE *o = open_memstream (numberp, &len);
+            while (q < f)
+               fputc (*q++, o);
+            fclose (o);
+         }
+         while (*q)
+            fputc (*q++, o);
+         fclose (o);
+         int n = find_module (new, a, b);
+         free (new);
+         if (n >= 0)
+         {
+            modules[n].n = 1;
+            return n;
+         }
       }
+      return find_module (fn, a, b);
+   }
 
    const char *checkignore (const char *ref)
    {
@@ -518,65 +525,67 @@ fclose(o);
    }
 
    /* The main PCB */
-   for(int side=0;side<2;side++)
+   for (int side = 0; side < 2; side++)
    {
-   int count=0;
-   fprintf (f, "// Parts to go on PCB (%s)\nmodule parts_%s(part=false,hole=false,block=false){\n",side?"bottom":"top",side?"bottom":"top");
-   o = NULL;
-   while ((o = pcb_find (pcb, "footprint", o)))
-   {
-      char back = 0;            /* back of board */
-      if (!(o2 = pcb_find (o, "layer", NULL)) || o2->valuen != 1 || !o2->values[0].istxt)
-         continue;
-      if (!strcmp (o2->values[0].txt, "B.Cu"))
-         back = 1;
-      else if (strcmp (o2->values[0].txt, "F.Cu"))
-         continue;
-      if(side!=back)continue;
-      // Find part reference
-      const char *ref = NULL;
-      o2 = NULL;
-      while ((o2 = pcb_find (o, "fp_text", o2)))
+      int count = 0;
+      fprintf (f, "// Parts to go on PCB (%s)\nmodule parts_%s(part=false,hole=false,block=false){\n", side ? "bottom" : "top",
+               side ? "bottom" : "top");
+      o = NULL;
+      while ((o = pcb_find (pcb, "footprint", o)))
       {
-         if (o2->valuen >= 2 && o2->values[0].islit && !strcmp(o2->values[0].txt,"reference")&&o2->values[1].istxt)
+         char back = 0;         /* back of board */
+         if (!(o2 = pcb_find (o, "layer", NULL)) || o2->valuen != 1 || !o2->values[0].istxt)
+            continue;
+         if (!strcmp (o2->values[0].txt, "B.Cu"))
+            back = 1;
+         else if (strcmp (o2->values[0].txt, "F.Cu"))
+            continue;
+         if (side != back)
+            continue;
+         // Find part reference
+         const char *ref = NULL;
+         o2 = NULL;
+         while ((o2 = pcb_find (o, "fp_text", o2)))
          {
-            ref = o2->values[1].txt;
-            break;
+            if (o2->valuen >= 2 && o2->values[0].islit && !strcmp (o2->values[0].txt, "reference") && o2->values[1].istxt)
+            {
+               ref = o2->values[1].txt;
+               break;
+            }
          }
-      }
-      if (checkignore (ref))
-         continue;
-      o2 = NULL;
+         if (checkignore (ref))
+            continue;
+         o2 = NULL;
 
-      int n=-1;
-      char *index=NULL;
+         int n = -1;
+         char *index = NULL;
 
-       { // LCSC Part #
-	const char *lcsc=NULL;
-      o2 = NULL;
-      while ((o2 = pcb_find (o, "property", o2)))
-      {
-         if (o2->valuen >= 2 && o2->values[0].istxt && !strcmp(o2->values[0].txt,"LCSC Part #")&&o2->values[1].istxt)
+         {                      // LCSC Part #
+            const char *lcsc = NULL;
+            o2 = NULL;
+            while ((o2 = pcb_find (o, "property", o2)))
+            {
+               if (o2->valuen >= 2 && o2->values[0].istxt && !strcmp (o2->values[0].txt, "LCSC Part #") && o2->values[1].istxt)
+               {
+                  lcsc = o2->values[1].txt;
+                  break;
+               }
+               if (lcsc)
+                  n = find_module (lcsc, ref, NULL);    // No number expanding on this
+            }
+         }
+
+         // Footprint
+         const char *footprint = NULL;
+         if (n < 0 && o->valuen >= 1 && o->values[0].istxt)
          {
-            lcsc = o2->values[1].txt;
-            break;
+            footprint = strchr (o->values[0].txt, ':');
+            if (footprint)
+               footprint++;
+            else
+               footprint = o->values[0].txt;
+            n = add_module (footprint, ref, NULL, &index);
          }
-	 if(lcsc)
-	 n=find_module(lcsc,ref,NULL);// No number expanding on this
-      }
-       }
-	
-      // Footprint
-      const char *footprint=NULL;
-      if (n<0&&o->valuen >= 1 && o->values[0].istxt)
-      {
-         footprint = strchr (o->values[0].txt, ':');
-         if (footprint)
-            footprint++;
-         else
-            footprint = o->values[0].txt;
-	 n=add_module(footprint,ref,NULL,&index);
-      }
 
          if (n >= 0)
          {                      // footprint level orientation
@@ -591,96 +600,104 @@ fclose(o);
             if (back)
                fprintf (f, "rotate([180,0,0])");
             if (modules[n].n && index)
-               fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n,side?"bottom":"top", index, modules[n].desc, back ? "" : " (back)");
+               fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n, side ? "bottom" : "top", index, modules[n].desc,
+                        back ? "" : " (back)");
             else
-               fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n,side?"bottom":"top", modules[n].desc, back ? "" : " (back)");
-	    count++;
+               fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n, side ? "bottom" : "top", modules[n].desc,
+                        back ? "" : " (back)");
+            count++;
             continue;
          }
-	    free(index);
+         free (index);
 
-	 // Add 3D models
-      int id = 0;
-      while ((o2 = pcb_find (o, "model", o2)))
-      {
-         if (o2->valuen < 1 || !o2->values[0].istxt)
-            continue;           /* Not 3D model */
-         id++;
-         char *model = strdup (o2->values[0].txt);
-         if (!model)
-            errx (1, "malloc");
-         char *leaf = strrchr (model, '/');
-         if (leaf)
-            leaf++;
-         else
-            leaf = model;
-         char *e = strrchr (model, '.');
-         if (e)
-            *e = 0;
-         int q = add_module (leaf, o->values[0].txt ? : ref ? : "-", leaf,&index);
-         char *refn;
-         if (asprintf (&refn, "%s.%d", ref, id) < 0)
-            errx (1, "malloc");
-         if (checkignore (refn))
+         // Add 3D models
+         int id = 0;
+         while ((o2 = pcb_find (o, "model", o2)))
          {
-            free (refn);
-	    free(index);
-            continue;
-         }
-         if (debug && ref)
-            warnx ("Module %s.%d %s%s", ref, id, leaf, back ? " (back)" : "");
-         free (refn);
-         if (q >= 0)
-         { // Model orientation
-		 n=q;
-            if ((o3 = pcb_find (o, "at", NULL)) && o3->valuen >= 2 && o3->values[0].isnum && o3->values[1].isnum)
+            if (o2->valuen < 1 || !o2->values[0].istxt)
+               continue;        /* Not 3D model */
+            id++;
+            char *model = strdup (o2->values[0].txt);
+            if (!model)
+               errx (1, "malloc");
+            char *leaf = strrchr (model, '/');
+            if (leaf)
+               leaf++;
+            else
+               leaf = model;
+            char *e = strrchr (model, '.');
+            if (e)
+               *e = 0;
+            int q = add_module (leaf, o->values[0].txt ? : ref ? : "-", leaf, &index);
+            char *refn;
+            if (asprintf (&refn, "%s.%d", ref, id) < 0)
+               errx (1, "malloc");
+            if (checkignore (refn))
             {
-               fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num - lx, ry - o3->values[1].num, back ? 0 : pcbthickness);
-               if (o3->valuen >= 3 && o3->values[2].isnum)
-                  fprintf (f, "rotate([0,0,%lf])", o3->values[2].num);
+               free (refn);
+               free (index);
+               continue;
             }
-            if (back)
-               fprintf (f, "rotate([180,0,0])");
-            if ((o3 = pcb_find (o2, "offset", NULL)) && (o3 = pcb_find (o3, "xyz", NULL)) && o3->valuen >= 3 && o3->values[0].isnum
-                && o3->values[1].isnum && o3->values[2].isnum && (o3->values[0].num || o3->values[1].num || o3->values[2].num))
-               fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num, o3->values[1].num, o3->values[2].num);
-            if ((o3 = pcb_find (o2, "scale", NULL)) && (o3 = pcb_find (o3, "xyz", NULL)) && o3->valuen >= 3 && o3->values[0].isnum
-                && o3->values[1].isnum && o3->values[2].isnum && (o3->values[0].num != 1 || o3->values[1].num != 1
-                                                                  || o3->values[2].num != 1))
-               fprintf (f, "scale([%lf,%lf,%lf])", o3->values[0].num, o3->values[1].num, o3->values[2].num);
-            if ((o3 = pcb_find (o2, "rotate", NULL)) && (o3 = pcb_find (o3, "xyz", NULL)) && o3->valuen >= 3 && o3->values[0].isnum
-                && o3->values[1].isnum && o3->values[2].isnum && (o3->values[0].num || o3->values[1].num || o3->values[2].num))
-               fprintf (f, "rotate([%lf,%lf,%lf])", -o3->values[0].num, -o3->values[1].num, -o3->values[2].num);
-	                if (modules[n].n && index)
-            fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n,side?"bottom":"top", index,modules[n].desc, back ? "" : " (back)");
-			else
-            fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n,side?"bottom":"top", modules[n].desc, back ? "" : " (back)");
-      if(n<0)warnx("Missing part %s %s",ref,footprint);
-         } else
-         {
-            fprintf (f, "// Missing model %s.%d %s%s\n", ref, id, leaf, back ? " (back)" : "");
-            warnx ("Missing %s.%d %s%s", ref, id, leaf, back ? " (back)" : "");
+            if (debug && ref)
+               warnx ("Module %s.%d %s%s", ref, id, leaf, back ? " (back)" : "");
+            free (refn);
+            if (q >= 0)
+            {                   // Model orientation
+               n = q;
+               if ((o3 = pcb_find (o, "at", NULL)) && o3->valuen >= 2 && o3->values[0].isnum && o3->values[1].isnum)
+               {
+                  fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num - lx, ry - o3->values[1].num, back ? 0 : pcbthickness);
+                  if (o3->valuen >= 3 && o3->values[2].isnum)
+                     fprintf (f, "rotate([0,0,%lf])", o3->values[2].num);
+               }
+               if (back)
+                  fprintf (f, "rotate([180,0,0])");
+               if ((o3 = pcb_find (o2, "offset", NULL)) && (o3 = pcb_find (o3, "xyz", NULL)) && o3->valuen >= 3
+                   && o3->values[0].isnum && o3->values[1].isnum && o3->values[2].isnum && (o3->values[0].num || o3->values[1].num
+                                                                                            || o3->values[2].num))
+                  fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num, o3->values[1].num, o3->values[2].num);
+               if ((o3 = pcb_find (o2, "scale", NULL)) && (o3 = pcb_find (o3, "xyz", NULL)) && o3->valuen >= 3
+                   && o3->values[0].isnum && o3->values[1].isnum && o3->values[2].isnum && (o3->values[0].num != 1
+                                                                                            || o3->values[1].num != 1
+                                                                                            || o3->values[2].num != 1))
+                  fprintf (f, "scale([%lf,%lf,%lf])", o3->values[0].num, o3->values[1].num, o3->values[2].num);
+               if ((o3 = pcb_find (o2, "rotate", NULL)) && (o3 = pcb_find (o3, "xyz", NULL)) && o3->valuen >= 3
+                   && o3->values[0].isnum && o3->values[1].isnum && o3->values[2].isnum && (o3->values[0].num || o3->values[1].num
+                                                                                            || o3->values[2].num))
+                  fprintf (f, "rotate([%lf,%lf,%lf])", -o3->values[0].num, -o3->values[1].num, -o3->values[2].num);
+               if (modules[n].n && index)
+                  fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n, side ? "bottom" : "top", index, modules[n].desc,
+                           back ? "" : " (back)");
+               else
+                  fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n, side ? "bottom" : "top", modules[n].desc,
+                           back ? "" : " (back)");
+               if (n < 0)
+                  warnx ("Missing part %s %s", ref, footprint);
+            } else
+            {
+               fprintf (f, "// Missing model %s.%d %s%s\n", ref, id, leaf, back ? " (back)" : "");
+               warnx ("Missing %s.%d %s%s %s", ref, id, leaf, back ? " (back)" : "", footprint);
+            }
+            free (model);
+            free (index);
          }
-	 free(model);
-	    free(index);
       }
-   }
-   fprintf (f, "}\n\n");
-   fprintf (f, "parts_%s=%d;\n",side?"bottom":"top",count);
+      fprintf (f, "}\n\n");
+      fprintf (f, "parts_%s=%d;\n", side ? "bottom" : "top", count);
    }
 
    fprintf (f, "module b(cx,cy,z,w,l,h){translate([cx-w/2,cy-l/2,z])cube([w,l,h]);}\n");
 
    /* Used models */
    for (int n = 0; n < modulen; n++)
-      {
-         if (modules[n].n)
-            fprintf (f, "module m%d(part=false,hole=false,block=false,height,N=0)\n{ // %s\n", n, modules[n].desc);
-         else
-            fprintf (f, "module m%d(part=false,hole=false,block=false,height)\n{ // %s\n", n, modules[n].desc);
-         copy_file (f, modules[n].filename);
-         fprintf (f, "}\n\n");
-      }
+   {
+      if (modules[n].n)
+         fprintf (f, "module m%d(part=false,hole=false,block=false,height,N=0)\n{ // %s\n", n, modules[n].desc);
+      else
+         fprintf (f, "module m%d(part=false,hole=false,block=false,height)\n{ // %s\n", n, modules[n].desc);
+      copy_file (f, modules[n].filename);
+      fprintf (f, "}\n\n");
+   }
 
    /* Final SCAD */
    copy_file (f, "../case.scad");
@@ -712,7 +729,7 @@ main (int argc, const char *argv[])
          {"hull-edge", 3, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &hulledge, 0, "Hull edge", "mm"},
          {"no-hull", 'h', POPT_ARG_NONE, &nohull, 0, "No hull on parts"},
          {"margin", 'm', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &margin, 0, "margin", "mm"},
-         {"lip", 0, POPT_ARG_DOUBLE|POPT_ARGFLAG_SHOW_DEFAULT, &lip, 0, "lip offset", "mm"},
+         {"lip", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &lip, 0, "lip offset", "mm"},
          {"pcb", 0, POPT_ARG_INT, &layerpcb, 0, "Use User.N as PCB border instead of Edge.Cuts", "N"},
          {"case", 0, POPT_ARG_INT, &layercase, 0, "Use User.N as case border instead of pcb", "N"},
          {"pcb-thickness", 'T', POPT_ARG_DOUBLE, &pcbthickness, 0, "PCB thickness (default: auto)", "mm"},
