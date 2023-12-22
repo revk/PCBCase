@@ -28,7 +28,7 @@ char *scadfile = NULL;
 const char *modeldir = "PCBCase/models";
 const char *ignore = NULL;
 double pcbthickness = 0;
-double casebase = 5;
+double casebottom = 5;
 double casetop = 5;
 double casewall = 3;            /* margin/2 eats in to this  */
 double lip = 2;                 /* Lip offset */
@@ -101,7 +101,7 @@ write_scad (pcb_t * pcb)
    fprintf (f, "// Globals\n");
    fprintf (f, "margin=%lf;\n", margin);
    fprintf (f, "lip=%lf;\n", lip);
-   fprintf (f, "casebase=%lf;\n", casebase);
+   fprintf (f, "casebottom=%lf;\n", casebottom);
    fprintf (f, "casetop=%lf;\n", casetop);
    fprintf (f, "casewall=%lf;\n", casewall);
    fprintf (f, "fit=%lf;\n", fit);
@@ -527,9 +527,10 @@ write_scad (pcb_t * pcb)
    /* The main PCB */
    for (int side = 0; side < 2; side++)
    {
+	   const char *sidename=side ? "bottom" : "top";
       int count = 0;
-      fprintf (f, "// Parts to go on PCB (%s)\nmodule parts_%s(part=false,hole=false,block=false){\n", side ? "bottom" : "top",
-               side ? "bottom" : "top");
+      fprintf (f, "// Parts to go on PCB (%s)\nmodule parts_%s(part=false,hole=false,block=false){\n", sidename,
+               sidename);
       o = NULL;
       while ((o = pcb_find (pcb, "footprint", o)))
       {
@@ -600,10 +601,10 @@ write_scad (pcb_t * pcb)
             if (back)
                fprintf (f, "rotate([180,0,0])");
             if (modules[n].n && index)
-               fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n, side ? "bottom" : "top", index, modules[n].desc,
+               fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n, sidename, index, modules[n].desc,
                         back ? "" : " (back)");
             else
-               fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n, side ? "bottom" : "top", modules[n].desc,
+               fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n, sidename, modules[n].desc,
                         back ? "" : " (back)");
             count++;
             continue;
@@ -666,10 +667,10 @@ write_scad (pcb_t * pcb)
                                                                                             || o3->values[2].num))
                   fprintf (f, "rotate([%lf,%lf,%lf])", -o3->values[0].num, -o3->values[1].num, -o3->values[2].num);
                if (modules[n].n && index)
-                  fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n, side ? "bottom" : "top", index, modules[n].desc,
+                  fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n, sidename, index, modules[n].desc,
                            back ? "" : " (back)");
                else
-                  fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n, side ? "bottom" : "top", modules[n].desc,
+                  fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n, sidename, modules[n].desc,
                            back ? "" : " (back)");
                if (n < 0)
                   warnx ("Missing part %s %s", ref, footprint);
@@ -683,7 +684,7 @@ write_scad (pcb_t * pcb)
          }
       }
       fprintf (f, "}\n\n");
-      fprintf (f, "parts_%s=%d;\n", side ? "bottom" : "top", count);
+      fprintf (f, "parts_%s=%d;\n", sidename, count);
    }
 
    fprintf (f, "module b(cx,cy,z,w,l,h){translate([cx-w/2,cy-l/2,z])cube([w,l,h]);}\n");
@@ -720,7 +721,7 @@ main (int argc, const char *argv[])
          {"pcb-file", 'i', POPT_ARG_STRING, &pcbfile, 0, "PCB file", "filename"},
          {"scad-file", 'o', POPT_ARG_STRING, &scadfile, 0, "Openscad file", "filename"},
          {"ignore", 'I', POPT_ARG_STRING, &ignore, 0, "Ignore", "ref{,ref}"},
-         {"base", 'b', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &casebase, 0, "Case base", "mm"},
+         {"bottom", 'b', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &casebottom, 0, "Case bottom", "mm"},
          {"top", 't', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &casetop, 0, "Case top", "mm"},
          {"wall", 'w', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &casewall, 0, "Case wall", "mm"},
          {"edge", 'e', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &edge, 0, "Case edge", "mm"},
