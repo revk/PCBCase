@@ -31,8 +31,8 @@ module preview()
 	color("#0f0")parts_bottom(part=true);
 	color("#f00")parts_top(hole=true);
 	color("#f00")parts_bottom(hole=true);
-	color("#00f")parts_top(block=true);
-	color("#00f")parts_bottom(block=true);
+	color("#00f8")parts_top(block=true);
+	color("#00f8")parts_bottom(block=true);
 }
 
 module top_half()
@@ -150,7 +150,6 @@ module top_body()
 			else hull()parts_top(part=true);
 			translate([0,0,margin-height])cylinder(r=margin,h=height,$fn=8);
 		}
-		parts_space();
 	}
 	intersection()
 	{
@@ -161,23 +160,24 @@ module top_body()
 
 module top_edge()
 {
-	difference()
+	intersection()
 	{
-		intersection()
-		{
-			case_wall();
-			top_cut();
-		}
-		parts_space();
+		case_wall();
+		top_cut();
 	}
 }
 
 module top()
 {
-	translate([casewall,casewall+pcblength,pcbthickness+casetop])rotate([180,0,0])
+	translate([casewall,casewall+pcblength,pcbthickness+casetop])rotate([180,0,0])difference()
 	{
-		top_body();
-		top_edge();
+		union()
+		{
+			top_body();
+			top_edge();
+		}
+		parts_space();
+		pcb(r=margin);
 	}
 }
 
@@ -197,7 +197,6 @@ module bottom_body()
 			else hull()parts_bottom(part=true);
 			translate([0,0,-margin])cylinder(r=margin,h=height,$fn=8);
 		}
-		parts_space();
 	}
 	intersection()
 	{
@@ -208,22 +207,23 @@ module bottom_body()
 
 module bottom_edge()
 {
-        difference()
-        {
-                intersection()
-                {
-                        case_wall();
-                        bottom_cut();
-                }
-		parts_space();
-        }
+	intersection()
+	{
+		case_wall();
+       		bottom_cut();
+	}
 }
 
 module bottom()
 {
-	translate([casewall,casewall,casebase])
+	translate([casewall,casewall,casebase])difference()
 	{
-        	bottom_body();
-        	bottom_edge();
+		union()
+		{
+        		bottom_body();
+        		bottom_edge();
+		}
+		parts_space();
+		pcb(pcbthickness+casetop,r=margin);
 	}
 }

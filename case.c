@@ -591,9 +591,9 @@ fclose(o);
             if (back)
                fprintf (f, "rotate([180,0,0])");
             if (modules[n].n && index)
-               fprintf (f, "m%d(part,hole,block,%s); // %s%s\n", n, index, modules[n].desc, back ? "" : " (back)");
+               fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n,side?"bottom":"top", index, modules[n].desc, back ? "" : " (back)");
             else
-               fprintf (f, "m%d(part,hole,block); // %s%s\n", n, modules[n].desc, back ? "" : " (back)");
+               fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n,side?"bottom":"top", modules[n].desc, back ? "" : " (back)");
 	    count++;
             continue;
          }
@@ -652,9 +652,9 @@ fclose(o);
                 && o3->values[1].isnum && o3->values[2].isnum && (o3->values[0].num || o3->values[1].num || o3->values[2].num))
                fprintf (f, "rotate([%lf,%lf,%lf])", -o3->values[0].num, -o3->values[1].num, -o3->values[2].num);
 	                if (modules[n].n && index)
-            fprintf (f, "m%d(part,hole,block,%s); // %s%s\n", n, index,modules[n].desc, back ? "" : " (back)");
+            fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n,side?"bottom":"top", index,modules[n].desc, back ? "" : " (back)");
 			else
-            fprintf (f, "m%d(part,hole,block); // %s%s\n", n, modules[n].desc, back ? "" : " (back)");
+            fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n,side?"bottom":"top", modules[n].desc, back ? "" : " (back)");
       if(n<0)warnx("Missing part %s %s",ref,footprint);
          } else
          {
@@ -675,9 +675,9 @@ fclose(o);
    for (int n = 0; n < modulen; n++)
       {
          if (modules[n].n)
-            fprintf (f, "module m%d(part=false,hole=false,block=false,N=0)\n{ // %s\n", n, modules[n].desc);
+            fprintf (f, "module m%d(part=false,hole=false,block=false,height,N=0)\n{ // %s\n", n, modules[n].desc);
          else
-            fprintf (f, "module m%d(part=false,hole=false,block=false)\n{ // %s\n", n, modules[n].desc);
+            fprintf (f, "module m%d(part=false,hole=false,block=false,height)\n{ // %s\n", n, modules[n].desc);
          copy_file (f, modules[n].filename);
          fprintf (f, "}\n\n");
       }
