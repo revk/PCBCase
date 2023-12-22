@@ -20,7 +20,7 @@ In any case, when checking a filename (apart from the LCSC Part), any numbers in
 
 ## How OpenSCAD is called
 
-- If `N` was used in the filename, then `N` is set to the numberic value, e.g. ``JST_EH_S5B-EH_1xN_P2.50mm_Horizontal.wrl`` will have `N` et to `5`.
+- If `N` was used in the filename, then `N` is set to the numeric value, e.g. ``JST_EH_S5B-EH_1xN_P2.50mm_Horizontal.wrl`` will have `N` et to `5`.
 - For the part shape itself, `part` is set `true`.
 - For the associated holes, `hole` is set `true`.
 - For the associated block, `block` is set `true`.
@@ -29,9 +29,13 @@ This basically means the OpenSCAD can be called for three things...
 
 In all cases the origin is the base of the centre of the part. The orientation is as per the 3D model.
 
+### Orientation
+
+When using the part number or footprint the orientation of the part matters, but when using the 3D model the exact 3D model orientation matters, so offset and rotations for the 3D model matter.
+
 ### Part
 
-The `part` simply needs to cover the physical size/shape of the part. A function `module b(cx,cy,z,w,l,h)` is provided allowing a comple cuboid. It is possible for the part to go below the z axis, e.g. for the leads for through hole parts.
+The `part` simply needs to cover the physical size/shape of the part. A function `module b(cx,cy,z,w,l,h)` is provided allowing a simple cuboid. It is possible for the part to go below the z axis, e.g. for the leads for through hole parts.
 
 ### Hole
 
