@@ -686,8 +686,8 @@ fclose(o);
    copy_file (f, "../case.scad");
 
    if (debug)
-      fprintf (f, "preview();\n");
-   else if (!norender)
+      fprintf (f, "translate([spacing*2,0,0])preview();\n");
+   if (!norender)
       fprintf (f, "bottom(); translate([spacing,0,0])top();\n");
 
    if (f != stdout)
