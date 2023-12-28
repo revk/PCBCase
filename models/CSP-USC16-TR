@@ -7,9 +7,9 @@ rotate([-90,0,0])translate([-4.47,-3.84,0])
 		rotate([-90,0,0])
 		hull()
 		{
-			cylinder(d=3.26,h=7.75,$fn=24);
+			cylinder(d=3.26,h=7.55,$fn=24);
 			translate([5.68,0,0])
-			cylinder(d=3.26,h=7.75,$fn=24);
+			cylinder(d=3.26,h=7.55,$fn=24);
 		}
 		translate([0,6.65,0])cube([8.94,1.1,1.63]);
 		translate([0,2.2,0])cube([8.94,1.6,1.63]);
