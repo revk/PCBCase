@@ -45,7 +45,7 @@ copy_file (FILE * o, const char *fn)
 {
    int f = open (fn, O_RDONLY);
    if (f < 0)
-      err (1, "Cannot open %s", fn);
+      err (1, "Cannot open copy %s", fn);
    struct stat s;
    if (fstat (f, &s))
       err (1, "Cannot stat %s", fn);
@@ -68,7 +68,7 @@ write_scad (pcb_t * pcb)
    if (strcmp (scadfile, "-"))
       f = fopen (scadfile, "w");
    if (!f)
-      err (1, "Cannot open %s", scadfile);
+      err (1, "Cannot open scad %s", scadfile);
 
    if (chdir (modeldir))
       errx (1, "Cannot access model dir %s", modeldir);
