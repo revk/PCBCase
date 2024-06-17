@@ -446,8 +446,10 @@ write_scad (pcb_t * pcb)
          errx (1, "malloc");
       memset (modules + n, 0, sizeof (*modules));
       modules[n].filename = strdup (fn);
-      if (!b)
+      if (a && !b)
          modules[n].desc = strdup (a);
+      else if (!a && b)
+         modules[n].desc = strdup (b);
       else if (asprintf (&modules[n].desc, "%s %s", a, b) < 0)
          errx (1, "malloc");
       if (debug)
@@ -527,10 +529,9 @@ write_scad (pcb_t * pcb)
    /* The main PCB */
    for (int side = 0; side < 2; side++)
    {
-	   const char *sidename=side ? "bottom" : "top";
+      const char *sidename = side ? "bottom" : "top";
       int count = 0;
-      fprintf (f, "// Parts to go on PCB (%s)\nmodule parts_%s(part=false,hole=false,block=false){\n", sidename,
-               sidename);
+      fprintf (f, "// Parts to go on PCB (%s)\nmodule parts_%s(part=false,hole=false,block=false){\n", sidename, sidename);
       o = NULL;
       while ((o = pcb_find (pcb, "footprint", o)))
       {
@@ -601,11 +602,9 @@ write_scad (pcb_t * pcb)
             if (back)
                fprintf (f, "rotate([180,0,0])");
             if (modules[n].n && index)
-               fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n, sidename, index, modules[n].desc,
-                        back ? "" : " (back)");
+               fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n, sidename, index, modules[n].desc, back ? "" : " (back)");
             else
-               fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n, sidename, modules[n].desc,
-                        back ? "" : " (back)");
+               fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n, sidename, modules[n].desc, back ? "" : " (back)");
             count++;
             continue;
          }
@@ -670,8 +669,7 @@ write_scad (pcb_t * pcb)
                   fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n, sidename, index, modules[n].desc,
                            back ? "" : " (back)");
                else
-                  fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n, sidename, modules[n].desc,
-                           back ? "" : " (back)");
+                  fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n, sidename, modules[n].desc, back ? "" : " (back)");
                if (n < 0)
                   warnx ("Missing part %s %s", ref, footprint);
             } else
