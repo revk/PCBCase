@@ -12,5 +12,5 @@ if(hole)
 	}
 	for(p=[0:N-1])translate([-3.5*(N-1)/2+p*3.5,0,-3.7])cylinder(r1=0.3,r2=1,h=3.7);
 	for(p=[0:N-1])translate([-3.5*(N-1)/2+p*3.5,0,8])cylinder(d=2.5,h=height);
-	for(p=[0:N-1])translate([-3.5*(N-1)/2+p*3.5,0,2.5])rotate([90,0,0])cylinder(d=3,h=10);
+	for(p=[0:N-1])translate([-3.5*(N-1)/2+p*3.5,0,2.5])rotate([90,0,0])cylinder(d=2.5,h=10);
 }
