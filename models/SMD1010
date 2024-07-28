@@ -15,7 +15,7 @@ if(block)
 {
         hull()
         {
-                b(0,0,0,2.2,2.2,1);
+                b(0,0,0,2.4,2.4,1);
                 translate([0,0,height])cylinder(d=4,h=1,$fn=16);
         }
 }
