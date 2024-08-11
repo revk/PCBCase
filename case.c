@@ -547,9 +547,9 @@ write_scad (pcb_t * pcb)
          // Find part reference
          const char *ref = NULL;
          o2 = NULL;
-         while ((o2 = pcb_find (o, "fp_text", o2)))
+         while ((o2 = pcb_find (o, "property", o2)))
          {
-            if (o2->valuen >= 2 && o2->values[0].islit && !strcmp (o2->values[0].txt, "reference") && o2->values[1].istxt)
+            if (o2->valuen >= 2 && o2->values[0].istxt && !strcmp (o2->values[0].txt, "Reference") && o2->values[1].istxt)
             {
                ref = o2->values[1].txt;
                break;

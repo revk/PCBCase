@@ -12,8 +12,8 @@ rotate([-90,0,0])translate([-4.47,-3.84,0])
 			translate([5.68,0,0])
 			cylinder(d=3.26,h=7.55,$fn=24);
 		}
-		translate([0,6.25,0])cube([8.94,1.1,1.63]);
-		translate([0,1.7,0])cube([8.94,1.6,1.63]);
+		translate([0,6.2501,0])cube([8.94,1.1,1.6301]);
+		translate([0,1.7,0])cube([8.94,1.6,1.6301]);
 	}
 	if(hole)
 	{
