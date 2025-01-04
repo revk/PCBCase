@@ -1,0 +1,10 @@
+if(part)
+{
+	b(0,0,0,3.5,2.65,0.23);
+	b(0,0,0,3.2,2.35,0.98);
+}
+if(hole)
+{
+	h=(casetop>casebottom?casetop:casebottom)+pcbthickness+1;
+	translate([0.71,0,-h])cylinder(d=1,h=h+0.01);
+}
