@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <math.h>
 #include "pcb.h"
+#include "iec18004.h"
 
 int
 main(int argc, const char *argv[])

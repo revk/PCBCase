@@ -3,8 +3,8 @@ all:	clean case tracklen PCB/Test/Test.scad PCB/Test/Test1.kicad_pcb PCB/Test/Te
 case:	case.c pcb.c models case.scad
 	gcc -O -o $@ $< pcb.c -lpopt -lm -g
 
-clean:	clean.c pcb.c QR/iec18004.o
-	gcc -O -o $@ $< pcb.c -lpopt -lm -g
+clean:	clean.c pcb.c QR/iec18004.o QR/Reedsol/reedsol.o
+	gcc -O -o $@ $< -IQR pcb.c QR/iec18004.o QR/Reedsol/reedsol.o -lpopt -lm -g
 
 update:
 	-git pull
@@ -14,6 +14,9 @@ update:
 
 QR/iec18004.o:	QR/iec18004.c
 	make -C QR iec18004.o
+
+QR/Reedsol/reedsol.o: QR/Reedsol/reedsol.c
+	make -C QR/Reedsol
 
 tracklen:	tracklen.c
 	gcc -O -o $@ $< -lpopt -lm -g
