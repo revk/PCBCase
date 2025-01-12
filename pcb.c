@@ -15,8 +15,8 @@
   /* strings from file, lots of common, so make a table */
 static int strn = 0;
 static const char **strs = NULL;        /* the object tags */
-static const char *
-add_string (const char *s, const char *e)
+const char *
+pcb_add_string (const char *s, const char *e)
 {                               /* allocates a string */
    if (!s)
       return NULL;
@@ -53,7 +53,7 @@ parse_obj (const char **pp, const char *e)
       p++;
    if (p == t)
       errx (1, "Expecting tag\n%.20s\n", t);
-   pcb->tag = add_string (t, p);
+   pcb->tag = pcb_add_string (t, p);
    /* values */
    while (p < e)
    {
@@ -86,7 +86,7 @@ parse_obj (const char **pp, const char *e)
          if (p == e)
             errx (1, "EOF");
          value->istxt = 1;
-         value->txt = add_string (t, p);
+         value->txt = pcb_add_string (t, p);
          p++;
          continue;
       }
@@ -134,7 +134,7 @@ parse_obj (const char **pp, const char *e)
       }
       /* assume string */
       value->islit = 1;
-      value->txt = add_string (t, p);
+      value->txt = pcb_add_string (t, p);
    }
    if (p >= e)
       errx (1, "EOF");
@@ -277,7 +277,7 @@ pcb_append_lit (pcb_t * o, const char *val)
 {                               // Append value lit
    pcb_val_t *v = pcb_append (o);
    v->islit = 1;
-   v->txt = add_string (val, NULL);
+   v->txt = pcb_add_string (val, NULL);
    return v;
 }
 
@@ -286,7 +286,7 @@ pcb_append_txt (pcb_t * o, const char *val)
 {                               // Append value txt
    pcb_val_t *v = pcb_append (o);
    v->istxt = 1;
-   v->txt = add_string (val, NULL);
+   v->txt = pcb_add_string (val, NULL);
    return v;
 }
 
@@ -306,7 +306,7 @@ pcb_append_obj (pcb_t * o, const char *val)
    v->isobj = 1;
    v->obj = malloc (sizeof (pcb_t));
    memset (v->obj, 0, sizeof (pcb_t));
-   v->obj->tag = add_string (val, NULL);
+   v->obj->tag = pcb_add_string (val, NULL);
    return v->obj;
 }
 

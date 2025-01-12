@@ -39,3 +39,4 @@ pcb_val_t *pcb_append_lit (pcb_t * o, const char *);    // Append a literal
 pcb_val_t *pcb_append_txt (pcb_t * o, const char *);    // Append a txt
 pcb_val_t *pcb_append_bool (pcb_t * o, int);    // Append a bool
 pcb_t *pcb_append_obj (pcb_t * o, const char *);        // Append an obj
+const char * pcb_add_string (const char *s, const char *e);
