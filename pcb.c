@@ -240,7 +240,7 @@ void
 pcb_delete (pcb_t * o)
 {
    pcb_clear (o);
-   o->tag=NULL; // Mark deleted
+   o->tag = NULL;               // Mark deleted
 }
 
 void

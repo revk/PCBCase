@@ -108,12 +108,12 @@ main (int argc, const char *argv[])
          errx (1, "Edge not found");
    }
    /* Clean up things that do not look good */
-		                zap( "Dwgs.User" ,NULL);
-                zap( "Cmts.User" ,NULL);
-                zap( "Eco1.User" ,NULL);
-                zap( "Eco2.User" ,NULL);
-                zap( "F.Fab" ,NULL);
-                zap( "B.Fab" ,NULL);
+   zap ("Dwgs.User", NULL);
+   zap ("Cmts.User", NULL);
+   zap ("Eco1.User", NULL);
+   zap ("Eco2.User", NULL);
+   zap ("F.Fab", NULL);
+   zap ("B.Fab", NULL);
    if (outfile)
       pcb_write (outfile, pcb);
    pcb = pcb_free (pcb);
