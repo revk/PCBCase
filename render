@@ -1,6 +1,6 @@
 #!/bin/csh -f
 # Render images for a PCB
-setenv ARGS "--zoom=0.5 --floor --width=2000 --height=2000 --background=opaque"
+setenv ARGS "--zoom=0.5 --floor --width=5000 --height=5000 --background=opaque"
 setenv BASE "$1:r"
 setenv BOARD "$BASE:t"
 setenv TMP `mktemp -u`.kicad_pcb
