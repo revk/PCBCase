@@ -130,10 +130,10 @@ main (int argc, const char *argv[])
                         pcb_t *e,
                          *r = pcb_append_obj (pcb, "gr_rect");
                         e = pcb_append_obj (r, "start");
-                        pcb_append_num (e, *layer=='B'?ex-u*x:sx + u * x);
+                        pcb_append_num (e, *layer == 'B' ? ex - u * x : sx + u * x);
                         pcb_append_num (e, sy + u * y);
                         e = pcb_append_obj (r, "end");
-                        pcb_append_num (e, *layer=='B'?ex-u*(x+1):sx + u * (x + 1));
+                        pcb_append_num (e, *layer == 'B' ? ex - u * (x + 1) : sx + u * (x + 1));
                         pcb_append_num (e, sy + u * (y + 1));
                         e = pcb_append_obj (r, "fill");
                         pcb_append_lit (e, "yes");
@@ -148,12 +148,12 @@ main (int argc, const char *argv[])
                pcb_append_num (e, ey + 1.5);
                e = pcb_append_obj (t, "layer");
                pcb_append_txt (e, layer);
-	       if(*layer=='B')
-	       {
-               e = pcb_append_obj (t, "effects");
-               e = pcb_append_obj (e, "justify");
-	       pcb_append_lit(e,"mirror");
-	       }
+               if (*layer == 'B')
+               {
+                  e = pcb_append_obj (t, "effects");
+                  e = pcb_append_obj (e, "justify");
+                  pcb_append_lit (e, "mirror");
+               }
                free (map);
             }
             free (val);
