@@ -98,8 +98,7 @@ main (int argc, const char *argv[])
       if (!zap (casework, "Edge.Cuts"))
          errx (1, "Edge not found");
    }
-   //Other deletes to clean up render
-
+   /* Other deletes to clean up render */
 
    if (outfile)
       pcb_write (outfile, pcb);
