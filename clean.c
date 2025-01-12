@@ -78,12 +78,14 @@ main (int argc, const char *argv[])
       }
       pcb_t *o = NULL;
       while ((o = check (pcb, "gr_line", o)));
+      while ((o = check (pcb, "gr_rect", o)));
       while ((o = check (pcb, "gr_arc", o)));
       while ((o = check (pcb, "gr_circle", o)));
       pcb_t *fp = NULL;
       while ((fp = pcb_find (pcb, "footprint", fp)))
       {
          while ((o = check (fp, "fp_line", o)));
+         while ((o = check (fp, "fp_rect", o)));
          while ((o = check (fp, "fp_arc", o)));
          while ((o = check (fp, "fp_circle", o)));
       }
