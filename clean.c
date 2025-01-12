@@ -77,14 +77,21 @@ main (int argc, const char *argv[])
          return n;
       }
       pcb_t *o = NULL;
+      while ((o = check (pcb, "dimension", o)));
+      while ((o = check (pcb, "gr_text", o)));
       while ((o = check (pcb, "gr_line", o)));
+      while ((o = check (pcb, "gr_poly", o)));
       while ((o = check (pcb, "gr_rect", o)));
       while ((o = check (pcb, "gr_arc", o)));
       while ((o = check (pcb, "gr_circle", o)));
       pcb_t *fp = NULL;
       while ((fp = pcb_find (pcb, "footprint", fp)))
       {
+         while ((o = check (fp, "dimension", o)));
+         while ((o = check (fp, "property", o)));
+         while ((o = check (fp, "fp_text", o)));
          while ((o = check (fp, "fp_line", o)));
+         while ((o = check (fp, "fp_poly", o)));
          while ((o = check (fp, "fp_rect", o)));
          while ((o = check (fp, "fp_arc", o)));
          while ((o = check (fp, "fp_circle", o)));
@@ -100,8 +107,13 @@ main (int argc, const char *argv[])
       if (!zap (casework, "Edge.Cuts"))
          errx (1, "Edge not found");
    }
-   /* Other deletes to clean up render */
-
+   /* Clean up things that do not look good */
+		                zap( "Dwgs.User" ,NULL);
+                zap( "Cmts.User" ,NULL);
+                zap( "Eco1.User" ,NULL);
+                zap( "Eco2.User" ,NULL);
+                zap( "F.Fab" ,NULL);
+                zap( "B.Fab" ,NULL);
    if (outfile)
       pcb_write (outfile, pcb);
    pcb = pcb_free (pcb);
