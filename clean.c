@@ -112,42 +112,45 @@ main (int argc, const char *argv[])
             ey = o2->values[1].num;
             if (lround ((ex - sx) * 10) != qrsize * 10 || lround ((ey - sy) * 10) != qrsize * 10)
                continue;
-	    int w;
-	    int num=time(0)%10000;;
-	    char tag[5];
-	    snprintf(tag,sizeof(tag),"%04u",num);
-	    char *val;
-	    asprintf(&val,"%s_%s",qr,tag);
-	    unsigned char *map=qr_encode(strlen(val),val,widthp:&w,noquiet:1);
-	    if(map)
-	    {
-		    double u=(double)qrsize/w;
-		    unsigned char *p=map;
-		    for(int y=0;y<w;y++)for(int x=0;x<w;x++)
-			    if(*(p++)&QR_TAG_BLACK)
-			    {
-				          pcb_t *e,*r = pcb_append_obj (pcb, "gr_rect");
-					  e=pcb_append_obj(r,"start");
-					  pcb_append_num(e,sx+u*x);
-					  pcb_append_num(e,sy+u*y);
-					  e=pcb_append_obj(r,"end");
-					  pcb_append_num(e,sx+u*(x+1));
-					  pcb_append_num(e,sy+u*(y+1));
-					  e=pcb_append_obj(r,"fill");
-					  pcb_append_lit(e,"yes");
-					  e=pcb_append_obj(r,"layer");
-					  pcb_append_txt(e,layer);
-			    }
-		    pcb_t *e,*t=pcb_append_obj(pcb,"gr_text");
-		    pcb_append_txt(t,tag);
-		    e=pcb_append_obj(t,"at");
-		    pcb_append_num(e,(sx+ex)/2);
-		    pcb_append_num(e,ey+1.5);
-		  e=pcb_append_obj(t,"layer");
-		  pcb_append_txt(e,layer);
-	    free(map);
-	    }
-	    free(val);
+            int w;
+            int num = time (0) % 10000;;
+            char tag[5];
+            snprintf (tag, sizeof (tag), "%04u", num);
+            char *val;
+            asprintf (&val, "%s_%s", qr, tag);
+          unsigned char *map = qr_encode (strlen (val), val, widthp: &w, noquiet:1);
+            if (map)
+            {
+               double u = (double) qrsize / w;
+               unsigned char *p = map;
+               for (int y = 0; y < w; y++)
+                  for (int x = 0; x < w; x++)
+                     if (*(p++) & QR_TAG_BLACK)
+                     {
+                        pcb_t *e,
+                         *r = pcb_append_obj (pcb, "gr_rect");
+                        e = pcb_append_obj (r, "start");
+                        pcb_append_num (e, sx + u * x);
+                        pcb_append_num (e, sy + u * y);
+                        e = pcb_append_obj (r, "end");
+                        pcb_append_num (e, sx + u * (x + 1));
+                        pcb_append_num (e, sy + u * (y + 1));
+                        e = pcb_append_obj (r, "fill");
+                        pcb_append_lit (e, "yes");
+                        e = pcb_append_obj (r, "layer");
+                        pcb_append_txt (e, layer);
+                     }
+               pcb_t *e,
+                *t = pcb_append_obj (pcb, "gr_text");
+               pcb_append_txt (t, tag);
+               e = pcb_append_obj (t, "at");
+               pcb_append_num (e, (sx + ex) / 2);
+               pcb_append_num (e, ey + 1.5);
+               e = pcb_append_obj (t, "layer");
+               pcb_append_txt (e, layer);
+               free (map);
+            }
+            free (val);
             pcb_delete (o);
             break;
          }
