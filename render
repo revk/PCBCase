@@ -15,11 +15,11 @@ setenv RM "$BASE:h/README.md"
 if(! -e "$RM") then
 	echo "# $BASE:h:t" > "$RM"
 	echo "" >> "$RM"
-	echo "![Top]($BASE:t.png)" >> "$RM"
-	echo "![Top rotated]($BASE:t-90.png)" >> "$RM"
-	echo "![Bottom]($BASE:t-bottom.png)" >> "$RM"
+	echo "\![Top]($BASE:t.png)" >> "$RM"
+	echo "\![Top rotated]($BASE:t-90.png)" >> "$RM"
+	echo "\![Bottom]($BASE:t-bottom.png)" >> "$RM"
 	if(-e "$BASE-panel.png") then
-		echo "![Panel]($BASE:t-panel.png)" >> "$RM"
+		echo "\![Panel]($BASE:t-panel.png)" >> "$RM"
 	endif
 endif
 rm -f "$TMP"
