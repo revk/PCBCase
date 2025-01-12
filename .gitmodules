@@ -1,0 +1,3 @@
+[submodule "QR"]
+	path = QR
+	url = https://github.com/revk/QR
