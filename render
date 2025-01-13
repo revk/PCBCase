@@ -7,22 +7,41 @@ setenv BOARD "$BASE:t"
 setenv TMP `mktemp -u`.kicad_pcb
 setenv PNG `mktemp -u`.png
 setenv QR "PCB-$BOARD-`date +%Y-%m-%d`"
+
+# Main view
 $0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --qr="$QR"
 /Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,0,30' $ARGS
 /Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
+
+# See if there is a panel (User.2)
 $0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --case=2 --qr="$QR"
 if(! $status) then
+	# There is a panel, so this is panel, and we need to render cut out as main
 	mv -f "$PNG" "$BASE-panel.png"
 	/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,0,30' $ARGS
 	/Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
 endif
 mv -f "$PNG" "$BASE.png"
+
+# 90 degree rotate top view
 /Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,0,-60' $ARGS
 /Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
 mv -f "$PNG" "$BASE-90.png"
+
+# Bottom view
 /Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,180,-30' $ARGS
 /Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
 mv -f "$PNG" "$BASE-bottom.png"
+
+# Alt cut out view
+$0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --case=4 --qr="$QR"
+if(! $status) then
+	/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,0,30' $ARGS
+	/Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
+	mv -f "$PNG" "$BASE-alt.png"
+endif
+
+# README is missing
 setenv RM "$BASE:h/README.md"
 if(! -e "$RM") then
 	echo "# $BOARD" > "$RM"
@@ -33,5 +52,10 @@ if(! -e "$RM") then
 	if(-e "$BASE-panel.png") then
 		echo "\![Panel]($BASE:t-panel.png)" >> "$RM"
 	endif
+	if(-e "$BASE-alt.png") then
+		echo "\![Panel]($BASE:t-alt.png)" >> "$RM"
+	endif
 endif
+
+# Done
 rm -f "$TMP"
