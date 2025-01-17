@@ -1,4 +1,4 @@
-#!/bin/csh -f
+#!/bin/csh -fx
 # Render images for a PCB
 setenv ARGS "--zoom=0.4 --floor --width=5000 --height=5000 --quality=high --preset=follow_pcb_editor"
 #setenv ARGS "$ARGS --background=opaque"
@@ -17,6 +17,7 @@ $0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --qr="$QR"
 $0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --case=2 --qr="$QR"
 if(! $status) then
 	# There is a panel, so this is panel, and we need to render cut out as main
+	setenv panel
 	mv -f "$PNG" "$BASE-panel.png"
 	/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,0,30' $ARGS
 	/Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
@@ -29,9 +30,17 @@ mv -f "$PNG" "$BASE.png"
 mv -f "$PNG" "$BASE-90.png"
 
 # Bottom view
+$0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --case=2 --qr="$QR"
 /Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,180,-30' $ARGS
 /Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
 mv -f "$PNG" "$BASE-bottom.png"
+
+if($?panel) then
+	$0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --qr="$QR" --eco-1
+	/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,180,-30' $ARGS
+	/Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
+	mv -f "$PNG" "$BASE-panel-bottom.png"
+endif
 
 # Alt cut out view
 $0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --case=4 --qr="$QR"
@@ -39,6 +48,13 @@ if(! $status) then
 	/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,0,30' $ARGS
 	/Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
 	mv -f "$PNG" "$BASE-alt.png"
+	/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,0,-60' $ARGS
+	/Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
+	mv -f "$PNG" "$BASE-alt-90.png"
+	$0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --case=4 --qr="$QR" --eco-1
+	/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,180,-30' $ARGS
+	/Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
+	mv -f "$PNG" "$BASE-alt-bottom.png"
 endif
 
 # README is missing
