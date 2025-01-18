@@ -60,17 +60,31 @@ endif
 # README is missing
 setenv RM "$BASE:h/README.md"
 if(! -e "$RM") then
-	echo "# $BOARD" > "$RM"
-	echo "" >> "$RM"
-	echo "\![Top]($BOARD.png)" >> "$RM"
-	echo "\![Top rotated]($BOARD-90.png)" >> "$RM"
-	echo "\![Bottom]($BOARD-bottom.png)" >> "$RM"
-	if(-e "$BASE-panel.png") then
-		echo "\![Panel]($BASE:t-panel.png)" >> "$RM"
-	endif
+	cat << END > "$TMP"
+# $BOARD
+
+These files are for use in [KiCad](https://www.kicad.org).
+
+## Trademark
+
+This is an open source project, but bear in mind you cannot sell boards bearing the Andrews & Arnold Ltd name, the A&A logo, the registered trademark AJK logo, or the GS1 allocated EANs assigned to Andrews & Arnold Ltd.
+
+## Images
+
+END
+	echo -n "<img src='$BOARD.png' width=32%>" >> "$TMP"
+	echo -n "<img src='$BOARD-90.png' width=32%>" >> "$TMP"
+	echo "<img src='$BOARD-bottom.png' width=32%>" >> "$TMP"
 	if(-e "$BASE-alt.png") then
-		echo "\![Panel]($BASE:t-alt.png)" >> "$RM"
+		echo -n "<img src='$BOARD-alt.png' width=32%>" >> "$TMP"
+		echo -n "<img src='$BOARD-alt-90.png' width=32%>" >> "$TMP"
+		echo "<img src='$BOARD-alt-bottom.png' width=32%>" >> "$TMP"
+		endif
+	if(-e "$BASE-panel.png") then
+		echo -n "<img src='$BOARD-panel.png' width=49%>" >> "$TMP"
+		echo "<img src='$BOARD-panel-bottom.png' width=49%>" >> "$TMP"
 	endif
+	mv -f "$TMP" "$RM"
 endif
 
 # Done
