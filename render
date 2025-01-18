@@ -1,4 +1,4 @@
-#!/bin/csh -fx
+#!/bin/csh -f
 # Render images for a PCB
 setenv ARGS "--zoom=0.4 --floor --width=5000 --height=5000 --quality=high --preset=follow_pcb_editor"
 #setenv ARGS "$ARGS --background=opaque"
