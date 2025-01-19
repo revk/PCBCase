@@ -89,7 +89,7 @@ END
 		echo "<img src='$BOARD-panel-bottom.png' width=49%>" >> "$TMP"
 	endif
 	echo "" >> "$TMP"
-	echo "*Auto generated `date %FT%T`" >> "$TMP"
+	echo "*Auto generated `date +%FT%T`*" >> "$TMP"
 	mv -f "$TMP" "$RM"
 endif
 
