@@ -59,6 +59,10 @@ endif
 
 # README is missing
 setenv RM "$BASE:h/README.md"
+if(-e "$RM") then
+	grep -q Auto "$RM"
+	if(! $status) rm -f "$RM"
+endif
 if(! -e "$RM") then
 	cat << END > "$TMP"
 # $BOARD
@@ -84,6 +88,8 @@ END
 		echo -n "<img src='$BOARD-panel.png' width=49%>" >> "$TMP"
 		echo "<img src='$BOARD-panel-bottom.png' width=49%>" >> "$TMP"
 	endif
+	echo "" >> "$TMP"
+	echo "*Auto generated `date %FT%T`" >> "$TMP"
 	mv -f "$TMP" "$RM"
 endif
 
