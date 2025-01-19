@@ -60,7 +60,7 @@ endif
 # README is missing
 setenv RM "$BASE:h/README.md"
 if(-e "$RM") then
-	grep -q Auto "$RM"
+	grep -q "Auto generated" "$RM"
 	if(! $status) rm -f "$RM"
 endif
 if(! -e "$RM") then
