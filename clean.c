@@ -22,17 +22,17 @@
 int
 main (int argc, const char *argv[])
 {
-   const char     *infile = NULL;
-   const char     *outfile = NULL;
-   const char     *qr = NULL;
-   int             qrsize = 8;
-   int             layercase = 0;
-   int             eco1 = 0;
-   int dm=0;
-   double	dmu=0.25;
-   int dmw=26;
-   int dmh=12;
-   poptContext     optCon;      /* context for parsing  command - line options */
+   const char *infile = NULL;
+   const char *outfile = NULL;
+   const char *qr = NULL;
+   int qrsize = 8;
+   int layercase = 0;
+   int eco1 = 0;
+   int dm = 0;
+   double dmu = 0.25;
+   int dmw = 26;
+   int dmh = 12;
+   poptContext optCon;          /* context for parsing  command - line options */
    {
       const struct poptOption optionsTable[] = {
          {"in-file", 'i', POPT_ARG_STRING, &infile, 0, "PCB input", "filename"},
@@ -40,7 +40,7 @@ main (int argc, const char *argv[])
          {"case", 0, POPT_ARG_INT, &layercase, 0, "Use User.N as case border instead of pcb (error if missing)", "N"},
          {"qr", 'q', POPT_ARG_STRING, &qr, 0, "Replace rectangle with QR", "Code"},
          {"qr-size", 0, POPT_ARG_INT, &qrsize, 0, "QR code size", "mm"},
-         {"dm", 'd', POPT_ARG_NONE, &dm, 0, "Place JLC Datamatrix code (3x6.5mm on User.Comments)" },
+         {"dm", 'd', POPT_ARG_NONE, &dm, 0, "Place JLC Datamatrix code (3x6.5mm on User.Comments)"},
          {"eco-1", 0, POPT_ARG_NONE, &eco1, 0, "Keep Eco1 layer", NULL},
          POPT_AUTOHELP {}
       };
@@ -68,10 +68,10 @@ main (int argc, const char *argv[])
    if (strcmp (pcb->tag, "kicad_pcb"))
       errx (1, "Not a kicad_pcb (%s)", pcb->tag);
 
-   int             zap(const char *layer, const char *newlayer)
-   { // Zap a layer
-      int             found = 0;
-pcb_t *         check(pcb_t * parent, const char *tag, pcb_t * o)
+   int zap (const char *layer, const char *newlayer)
+   {                            // Zap a layer
+      int found = 0;
+      pcb_t *check (pcb_t * parent, const char *tag, pcb_t * o)
       {
          if (!o)
             o = pcb_find (parent, tag, o);      /* First */
@@ -88,77 +88,78 @@ pcb_t *         check(pcb_t * parent, const char *tag, pcb_t * o)
             pcb_delete (o);
          return n;
       }
-      pcb_t          *o = NULL;
-      while           ((o = check(pcb, "dimension", o)));
-      while           ((o = check(pcb, "gr_text", o)));
-      while           ((o = check(pcb, "gr_line", o)));
-      while           ((o = check(pcb, "gr_poly", o)));
-      while           ((o = check(pcb, "gr_rect", o)));
-      while           ((o = check(pcb, "gr_arc", o)));
-      while           ((o = check(pcb, "gr_circle", o)));
-      pcb_t          *fp = NULL;
-      while           ((fp = pcb_find(pcb, "footprint", fp)))
+      pcb_t *o = NULL;
+      while ((o = check (pcb, "dimension", o)));
+      while ((o = check (pcb, "gr_text", o)));
+      while ((o = check (pcb, "gr_line", o)));
+      while ((o = check (pcb, "gr_poly", o)));
+      while ((o = check (pcb, "gr_rect", o)));
+      while ((o = check (pcb, "gr_arc", o)));
+      while ((o = check (pcb, "gr_circle", o)));
+      pcb_t *fp = NULL;
+      while ((fp = pcb_find (pcb, "footprint", fp)))
       {
-         while ((o = check(fp, "dimension", o)));
-         while ((o = check(fp, "property", o)));
-         while ((o = check(fp, "fp_text", o)));
-         while ((o = check(fp, "fp_line", o)));
-         while ((o = check(fp, "fp_poly", o)));
-         while ((o = check(fp, "fp_rect", o)));
-         while ((o = check(fp, "fp_arc", o)));
-         while ((o = check(fp, "fp_circle", o)));
+         while ((o = check (fp, "dimension", o)));
+         while ((o = check (fp, "property", o)));
+         while ((o = check (fp, "fp_text", o)));
+         while ((o = check (fp, "fp_line", o)));
+         while ((o = check (fp, "fp_poly", o)));
+         while ((o = check (fp, "fp_rect", o)));
+         while ((o = check (fp, "fp_arc", o)));
+         while ((o = check (fp, "fp_circle", o)));
       }
-                      return found;
+      return found;
    }
 
-if(qr||dm)
-{
-	time_t now=time(0);
-struct tm tm;
-localtime_r(&now,&tm);
-            char            tag[5];
-                            snprintf(tag, sizeof(tag), "%04u", now%10000);
+   if (qr || dm)
+   {
+      time_t now = time (0);
+      struct tm tm;
+      localtime_r (&now, &tm);
+      char tag[5];
+      snprintf (tag, sizeof (tag), "%04u", now % 10000);
 
-      if              (qr)
+      if (qr)
       {
-			 pcb_t *         check_qr(pcb_t * parent, const char *tag, pcb_t * o)
+         pcb_t *check_qr (pcb_t * parent, const char *tag, pcb_t * o)
          {
-         if (!o)
-            o = pcb_find(parent, tag, o);       /* First */
-         if (!o)
-            return o;
-         pcb_t          *n = pcb_find(parent, tag, o);  /* Next */
-            pcb_t * o2;
-            const char     *layer = NULL;
-            double          sx = 0,
-                            sy = 0,
-                            ex = 0,
-                            ey = 0;
-            if              (!(o2 = pcb_find(o, "fill", NULL)) || o2->valuen != 1 || !o2->values[0].islit || strcmp(o2->values[0].txt, "yes"))
+            if (!o)
+               o = pcb_find (parent, tag, o);   /* First */
+            if (!o)
+               return o;
+            pcb_t *n = pcb_find (parent, tag, o);       /* Next */
+            pcb_t *o2;
+            const char *layer = NULL;
+            double sx = 0,
+               sy = 0,
+               ex = 0,
+               ey = 0;
+            if (!(o2 = pcb_find (o, "fill", NULL)) || o2->valuen != 1 || !o2->values[0].islit || strcmp (o2->values[0].txt, "yes"))
                return n;
-            if              (!(o2 = pcb_find(o, "stroke", NULL)) || !(o2 = pcb_find(o2, "width", NULL)) || o2->valuen != 1
-                             || !o2->values[0].isnum || o2->values[0].num)
+            if (!(o2 = pcb_find (o, "stroke", NULL)) || !(o2 = pcb_find (o2, "width", NULL)) || o2->valuen != 1
+                || !o2->values[0].isnum || o2->values[0].num)
                return n;
-            if              (!(o2 = pcb_find(o, "layer", NULL)) || o2->valuen != 1 || !o2->values[0].istxt
-                             || !strstr(o2->values[0].txt, "SilkS"))
+            if (!(o2 = pcb_find (o, "layer", NULL)) || o2->valuen != 1 || !o2->values[0].istxt
+                || !strstr (o2->values[0].txt, "SilkS"))
                return n;
-                            layer = o2->values[0].txt;
-            if              (!(o2 = pcb_find(o, "start", NULL)) || o2->valuen != 2 || !o2->values[0].isnum || !o2->values[1].isnum)
+            layer = o2->values[0].txt;
+            if (!(o2 = pcb_find (o, "start", NULL)) || o2->valuen != 2 || !o2->values[0].isnum || !o2->values[1].isnum)
                return n;
-                            sx = o2->values[0].num;
-                            sy = o2->values[1].num;
-            if              (!(o2 = pcb_find(o, "end", NULL)) || o2->valuen != 2 || !o2->values[0].isnum || !o2->values[1].isnum)
+            sx = o2->values[0].num;
+            sy = o2->values[1].num;
+            if (!(o2 = pcb_find (o, "end", NULL)) || o2->valuen != 2 || !o2->values[0].isnum || !o2->values[1].isnum)
                return n;
-                            ex = o2->values[0].num;
-                            ey = o2->values[1].num;
-            if              (lround((ex - sx) * 10) != qrsize * 10 || lround((ey - sy) * 10) != qrsize * 10)
-                               return n;
-            int             w;
-            char           *val;
-                            asprintf(&val, "%s_%s", qr, tag);
-            unsigned char  *map = qr_encode(strlen(val), val, widthp:&w, noquiet:1);
-	    if(!map)warnx("QR fails %s",val);
-	    else
+            ex = o2->values[0].num;
+            ey = o2->values[1].num;
+            if (lround ((ex - sx) * 10) != qrsize * 10 || lround ((ey - sy) * 10) != qrsize * 10)
+               return n;
+            int w;
+            char *val;
+            asprintf (&val, "%s_%s", qr, tag);
+          unsigned char *map = qr_encode (strlen (val), val, widthp: &w, noquiet:1);
+            if (!map)
+               warnx ("QR fails %s", val);
+            else
             {
                double u = (double) qrsize / w;
                unsigned char *p = map;
@@ -195,103 +196,105 @@ localtime_r(&now,&tm);
                }
                free (map);
             }
-                            free(val);
-                            pcb_delete(o);
-			    return n;
+            free (val);
+            pcb_delete (o);
+            return n;
          }
-      pcb_t          *o = NULL;
-         while ((o = check_qr(pcb, "gr_rect", o)));
-      pcb_t          *fp = NULL;
-      while           ((fp = pcb_find(pcb, "footprint", fp)))
-         while ((o = check_qr(fp, "fp_rect", o)));
+         pcb_t *o = NULL;
+         while ((o = check_qr (pcb, "gr_rect", o)));
+         pcb_t *fp = NULL;
+         while ((fp = pcb_find (pcb, "footprint", fp)))
+            while ((o = check_qr (fp, "fp_rect", o)));
       }
-      if              (dm)
+      if (dm)
       {
-			 pcb_t *         check_dm(pcb_t * parent, const char *tag, pcb_t * o)
+         pcb_t *check_dm (pcb_t * parent, const char *tag, pcb_t * o)
          {
-         if (!o)
-            o = pcb_find(parent, tag, o);       /* First */
-         if (!o)
-            return o;
-         pcb_t          *n = pcb_find(parent, tag, o);  /* Next */
-            pcb_t * o2;
-            const char     *layer = NULL;
-            double          sx = 0,
-                            sy = 0,
-                            ex = 0,
-                            ey = 0;
-            if              (!(o2 = pcb_find(o, "fill", NULL)) || o2->valuen != 1 || !o2->values[0].islit || strcmp(o2->values[0].txt, "yes"))
+            if (!o)
+               o = pcb_find (parent, tag, o);   /* First */
+            if (!o)
+               return o;
+            pcb_t *n = pcb_find (parent, tag, o);       /* Next */
+            pcb_t *o2;
+            const char *layer = NULL;
+            double sx = 0,
+               sy = 0,
+               ex = 0,
+               ey = 0;
+            if (!(o2 = pcb_find (o, "fill", NULL)) || o2->valuen != 1 || !o2->values[0].islit || strcmp (o2->values[0].txt, "yes"))
                return n;
-            if              (!(o2 = pcb_find(o, "stroke", NULL)) || !(o2 = pcb_find(o2, "width", NULL)) || o2->valuen != 1
-                             || !o2->values[0].isnum || o2->values[0].num)
+            if (!(o2 = pcb_find (o, "stroke", NULL)) || !(o2 = pcb_find (o2, "width", NULL)) || o2->valuen != 1
+                || !o2->values[0].isnum || o2->values[0].num)
                return n;
-            if              (!(o2 = pcb_find(o, "layer", NULL)) || o2->valuen != 1 || !o2->values[0].istxt
-                             || !strstr(o2->values[0].txt, "Cmts.User"))
+            if (!(o2 = pcb_find (o, "layer", NULL)) || o2->valuen != 1 || !o2->values[0].istxt
+                || !strstr (o2->values[0].txt, "Cmts.User"))
                return n;
-                            layer = o2->values[0].txt;
-			    layer="F.SilkS";
-            if              (!(o2 = pcb_find(o, "start", NULL)) || o2->valuen != 2 || !o2->values[0].isnum || !o2->values[1].isnum)
+            layer = o2->values[0].txt;
+            layer = "F.SilkS";
+            if (!(o2 = pcb_find (o, "start", NULL)) || o2->valuen != 2 || !o2->values[0].isnum || !o2->values[1].isnum)
                return n;
-                            sx = o2->values[0].num;
-                            sy = o2->values[1].num;
-            if              (!(o2 = pcb_find(o, "end", NULL)) || o2->valuen != 2 || !o2->values[0].isnum || !o2->values[1].isnum)
+            sx = o2->values[0].num;
+            sy = o2->values[1].num;
+            if (!(o2 = pcb_find (o, "end", NULL)) || o2->valuen != 2 || !o2->values[0].isnum || !o2->values[1].isnum)
                return n;
-                            ex = o2->values[0].num;
-                            ey = o2->values[1].num;
-            if              (lround((ex - sx) * 10) != lround(dmw * dmu*10) || lround((ey - sy) * 10) != lround(dmh*dmu * 10))
-                               return n;
-            unsigned int             w=dmw,h=dmh;
-	    char val[18];
-	    snprintf(val,sizeof(val),"01%02d%02d%02d%05d%s",tm.tm_year%100,tm.tm_mon+1,tm.tm_mday,now/10000%100000,tag); // Like the code they use
-            unsigned char  *map = iec16022ecc200(&w,&h,barcodelen:strlen(val), barcode:val, noquiet:1);
-	    if(!map)warnx("Datamatrix failed %s",val);
-	    else
+            ex = o2->values[0].num;
+            ey = o2->values[1].num;
+            if (lround ((ex - sx) * 10) != lround (dmw * dmu * 10) || lround ((ey - sy) * 10) != lround (dmh * dmu * 10))
+               return n;
+            unsigned int w = dmw,
+               h = dmh;
+            char val[18];
+            snprintf (val, sizeof (val), "01%02d%02d%02d%05d%s", tm.tm_year % 100, tm.tm_mon + 1, tm.tm_mday, now / 10000 % 100000, tag);       // Like the code they use
+          unsigned char *map = iec16022ecc200 (&w, &h, barcodelen: strlen (val), barcode: val, noquiet:1);
+            if (!map)
+               warnx ("Datamatrix failed %s", val);
+            else
             {
-               unsigned char  *p = map;
-               for             (int y = 0; y < w; y++)
-                  for             (int x = 0; x < h; x++)
-if              (*(p++) & QR_TAG_BLACK)
+               unsigned char *p = map;
+               for (int y = 0; y < w; y++)
+                  for (int x = 0; x < h; x++)
+                     if (*(p++) & QR_TAG_BLACK)
                      {
-                        pcb_t          *e,
-                                       *r = pcb_append_obj(pcb, "gr_rect");
-                                        e = pcb_append_obj(r, "start");
-                                        pcb_append_num(e, *layer == 'B' ? ex - dmu * x : sx + dmu * x);
-                                        pcb_append_num(e, sy + dmu * y);
-                                        e = pcb_append_obj(r, "end");
-                                        pcb_append_num(e, *layer == 'B' ? ex - dmu * (x + 1) : sx + dmu * (x + 1));
-                                        pcb_append_num(e, sy + dmu * (y + 1));
-                                        e = pcb_append_obj(r, "fill");
-                                        pcb_append_lit(e, "yes");
-                                        e = pcb_append_obj(r, "layer");
-                                        pcb_append_txt(e, layer);
+                        pcb_t *e,
+                         *r = pcb_append_obj (pcb, "gr_rect");
+                        e = pcb_append_obj (r, "start");
+                        pcb_append_num (e, *layer == 'B' ? ex - dmu * x : sx + dmu * x);
+                        pcb_append_num (e, sy + dmu * y);
+                        e = pcb_append_obj (r, "end");
+                        pcb_append_num (e, *layer == 'B' ? ex - dmu * (x + 1) : sx + dmu * (x + 1));
+                        pcb_append_num (e, sy + dmu * (y + 1));
+                        e = pcb_append_obj (r, "fill");
+                        pcb_append_lit (e, "yes");
+                        e = pcb_append_obj (r, "layer");
+                        pcb_append_txt (e, layer);
                      }
-               pcb_t          *e,
-                              *t = pcb_append_obj(pcb, "gr_text");
-                               pcb_append_txt(t, tag);
-                               e = pcb_append_obj(t, "at");
-                               pcb_append_num(e, (sx + ex) / 2);
-                               pcb_append_num(e, ey + 1.5);
-                               e = pcb_append_obj(t, "layer");
-                               pcb_append_txt(e, layer);
-               if              (*layer == 'B')
+               pcb_t *e,
+                *t = pcb_append_obj (pcb, "gr_text");
+               pcb_append_txt (t, tag);
+               e = pcb_append_obj (t, "at");
+               pcb_append_num (e, (sx + ex) / 2);
+               pcb_append_num (e, ey + 1.5);
+               e = pcb_append_obj (t, "layer");
+               pcb_append_txt (e, layer);
+               if (*layer == 'B')
                {
-                  e = pcb_append_obj(t, "effects");
-                  e = pcb_append_obj(e, "justify");
-                  pcb_append_lit(e, "mirror");
+                  e = pcb_append_obj (t, "effects");
+                  e = pcb_append_obj (e, "justify");
+                  pcb_append_lit (e, "mirror");
                }
-                               free(map);
+               free (map);
             }
-                            pcb_delete(o);
-			    return n;
+            pcb_delete (o);
+            return n;
          }
-      pcb_t          *o = NULL;
-         while ((o = check_dm(pcb, "gr_rect", o)));
-      pcb_t          *fp = NULL;
-      while           ((fp = pcb_find(pcb, "footprint", fp)))
-         while ((o = check_dm(fp, "fp_rect", o)));
+         pcb_t *o = NULL;
+         while ((o = check_dm (pcb, "gr_rect", o)));
+         pcb_t *fp = NULL;
+         while ((fp = pcb_find (pcb, "footprint", fp)))
+            while ((o = check_dm (fp, "fp_rect", o)));
       }
-}
-   if              (layercase)
+   }
+   if (layercase)
    {                            /* Replace Edge.Cuts with User.N */
       char casework[20];
       sprintf (casework, "User.%d", layercase);
