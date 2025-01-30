@@ -181,8 +181,9 @@ main (int argc, const char *argv[])
                         pcb_append_txt (e, layer);
                      }
                pcb_t *e,
-                *t = pcb_append_obj (parent, *tag=='f'?"fp_text":"gr_text");
-	       if(*tag=='f')pcb_append_lit(t,"user");
+                *t = pcb_append_obj (parent, *tag == 'f' ? "fp_text" : "gr_text");
+               if (*tag == 'f')
+                  pcb_append_lit (t, "user");
                pcb_append_txt (t, nnnn);
                e = pcb_append_obj (t, "at");
                pcb_append_num (e, (sx + ex) / 2);
@@ -230,7 +231,7 @@ main (int argc, const char *argv[])
             if (!(o2 = pcb_find (o, "layer", NULL)) || o2->valuen != 1 || !o2->values[0].istxt
                 || !strstr (o2->values[0].txt, ".Fab"))
                return n;
-            layer = (*o2->values[0].txt=='F'?"F.SilkS":"B.SilkS");
+            layer = (*o2->values[0].txt == 'F' ? "F.SilkS" : "B.SilkS");
             if (!(o2 = pcb_find (o, "start", NULL)) || o2->valuen != 2 || !o2->values[0].isnum || !o2->values[1].isnum)
                return n;
             sx = o2->values[0].num;
@@ -244,7 +245,7 @@ main (int argc, const char *argv[])
             unsigned int w = dmw,
                h = dmh;
             char val[18];
-            snprintf (val, sizeof (val), "01%02d%02d%02d%05d%s", tm.tm_year % 100, tm.tm_mon + 1, tm.tm_mday, now / 10000 % 100000, nnnn);       // Like the code they use
+            snprintf (val, sizeof (val), "01%02d%02d%02d%05d%s", tm.tm_year % 100, tm.tm_mon + 1, tm.tm_mday, now / 10000 % 100000, nnnn);      // Like the code they use
           unsigned char *map = iec16022ecc200 (&w, &h, barcodelen: strlen (val), barcode: val, noquiet:1);
             if (!map)
                warnx ("Datamatrix failed %s", val);
@@ -269,18 +270,19 @@ main (int argc, const char *argv[])
                         pcb_append_txt (e, layer);
                      }
                pcb_t *e,
-                *t = pcb_append_obj (parent, *tag=='f'?"fp_text":"gr_text");
-	       if(*tag=='f')pcb_append_lit(t,"user");
+                *t = pcb_append_obj (parent, *tag == 'f' ? "fp_text" : "gr_text");
+               if (*tag == 'f')
+                  pcb_append_lit (t, "user");
                pcb_append_txt (t, nnnn);
                e = pcb_append_obj (t, "at");
-               pcb_append_num (e, *layer=='B'?sx-1:ex+1);
-               pcb_append_num (e, (sy+ey)/2);
+               pcb_append_num (e, *layer == 'B' ? sx - 1 : ex + 1);
+               pcb_append_num (e, (sy + ey) / 2);
                e = pcb_append_obj (t, "layer");
                pcb_append_txt (e, layer);
-                  e = pcb_append_obj (t, "effects");
-                  e = pcb_append_obj (e, "justify");
-                  pcb_append_lit (e, "left");
-		  if(*layer=='B')
+               e = pcb_append_obj (t, "effects");
+               e = pcb_append_obj (e, "justify");
+               pcb_append_lit (e, "left");
+               if (*layer == 'B')
                   pcb_append_lit (e, "mirror");
                free (map);
             }
