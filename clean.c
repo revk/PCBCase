@@ -40,7 +40,7 @@ main (int argc, const char *argv[])
          {"case", 0, POPT_ARG_INT, &layercase, 0, "Use User.N as case border instead of pcb (error if missing)", "N"},
          {"qr", 'q', POPT_ARG_STRING, &qr, 0, "Replace rectangle with QR", "Code"},
          {"qr-size", 0, POPT_ARG_INT, &qrsize, 0, "QR code size", "mm"},
-         {"dm", 'd', POPT_ARG_NONE, &dm, 0, "Place JLC Datamatrix code (3x6.5mm on User.Comments)"},
+         {"dm", 'd', POPT_ARG_NONE, &dm, 0, "Place JLC Datamatrix code (3x6.5mm on Fab)"},
          {"eco-1", 0, POPT_ARG_NONE, &eco1, 0, "Keep Eco1 layer", NULL},
          POPT_AUTOHELP {}
       };
@@ -116,8 +116,8 @@ main (int argc, const char *argv[])
       time_t now = time (0);
       struct tm tm;
       localtime_r (&now, &tm);
-      char tag[5];
-      snprintf (tag, sizeof (tag), "%04u", now % 10000);
+      char nnnn[5];
+      snprintf (nnnn, sizeof (nnnn), "%04u", now % 10000);
 
       if (qr)
       {
@@ -140,7 +140,7 @@ main (int argc, const char *argv[])
                 || !o2->values[0].isnum || o2->values[0].num)
                return n;
             if (!(o2 = pcb_find (o, "layer", NULL)) || o2->valuen != 1 || !o2->values[0].istxt
-                || !strstr (o2->values[0].txt, "SilkS"))
+                || !strstr (o2->values[0].txt, ".SilkS"))
                return n;
             layer = o2->values[0].txt;
             if (!(o2 = pcb_find (o, "start", NULL)) || o2->valuen != 2 || !o2->values[0].isnum || !o2->values[1].isnum)
@@ -155,7 +155,7 @@ main (int argc, const char *argv[])
                return n;
             int w;
             char *val;
-            asprintf (&val, "%s_%s", qr, tag);
+            asprintf (&val, "%s_%s", qr, nnnn);
           unsigned char *map = qr_encode (strlen (val), val, widthp: &w, noquiet:1);
             if (!map)
                warnx ("QR fails %s", val);
@@ -168,7 +168,7 @@ main (int argc, const char *argv[])
                      if (*(p++) & QR_TAG_BLACK)
                      {
                         pcb_t *e,
-                         *r = pcb_append_obj (pcb, "gr_rect");
+                         *r = pcb_append_obj (parent, tag);
                         e = pcb_append_obj (r, "start");
                         pcb_append_num (e, *layer == 'B' ? ex - u * x : sx + u * x);
                         pcb_append_num (e, sy + u * y);
@@ -181,8 +181,9 @@ main (int argc, const char *argv[])
                         pcb_append_txt (e, layer);
                      }
                pcb_t *e,
-                *t = pcb_append_obj (pcb, "gr_text");
-               pcb_append_txt (t, tag);
+                *t = pcb_append_obj (parent, *tag=='f'?"fp_text":"gr_text");
+	       if(*tag=='f')pcb_append_lit(t,"user");
+               pcb_append_txt (t, nnnn);
                e = pcb_append_obj (t, "at");
                pcb_append_num (e, (sx + ex) / 2);
                pcb_append_num (e, ey + 1.5);
@@ -227,10 +228,9 @@ main (int argc, const char *argv[])
                 || !o2->values[0].isnum || o2->values[0].num)
                return n;
             if (!(o2 = pcb_find (o, "layer", NULL)) || o2->valuen != 1 || !o2->values[0].istxt
-                || !strstr (o2->values[0].txt, "Cmts.User"))
+                || !strstr (o2->values[0].txt, ".Fab"))
                return n;
-            layer = o2->values[0].txt;
-            layer = "F.SilkS";
+            layer = (*o2->values[0].txt=='F'?"F.SilkS":"B.SilkS");
             if (!(o2 = pcb_find (o, "start", NULL)) || o2->valuen != 2 || !o2->values[0].isnum || !o2->values[1].isnum)
                return n;
             sx = o2->values[0].num;
@@ -244,19 +244,19 @@ main (int argc, const char *argv[])
             unsigned int w = dmw,
                h = dmh;
             char val[18];
-            snprintf (val, sizeof (val), "01%02d%02d%02d%05d%s", tm.tm_year % 100, tm.tm_mon + 1, tm.tm_mday, now / 10000 % 100000, tag);       // Like the code they use
+            snprintf (val, sizeof (val), "01%02d%02d%02d%05d%s", tm.tm_year % 100, tm.tm_mon + 1, tm.tm_mday, now / 10000 % 100000, nnnn);       // Like the code they use
           unsigned char *map = iec16022ecc200 (&w, &h, barcodelen: strlen (val), barcode: val, noquiet:1);
             if (!map)
                warnx ("Datamatrix failed %s", val);
             else
             {
                unsigned char *p = map;
-               for (int y = 0; y < w; y++)
-                  for (int x = 0; x < h; x++)
+               for (int y = 0; y < h; y++)
+                  for (int x = 0; x < w; x++)
                      if (*(p++) & QR_TAG_BLACK)
                      {
                         pcb_t *e,
-                         *r = pcb_append_obj (pcb, "gr_rect");
+                         *r = pcb_append_obj (parent, tag);
                         e = pcb_append_obj (r, "start");
                         pcb_append_num (e, *layer == 'B' ? ex - dmu * x : sx + dmu * x);
                         pcb_append_num (e, sy + dmu * y);
@@ -269,19 +269,19 @@ main (int argc, const char *argv[])
                         pcb_append_txt (e, layer);
                      }
                pcb_t *e,
-                *t = pcb_append_obj (pcb, "gr_text");
-               pcb_append_txt (t, tag);
+                *t = pcb_append_obj (parent, *tag=='f'?"fp_text":"gr_text");
+	       if(*tag=='f')pcb_append_lit(t,"user");
+               pcb_append_txt (t, nnnn);
                e = pcb_append_obj (t, "at");
-               pcb_append_num (e, (sx + ex) / 2);
-               pcb_append_num (e, ey + 1.5);
+               pcb_append_num (e, *layer=='B'?sx-1:ex+1);
+               pcb_append_num (e, (sy+ey)/2);
                e = pcb_append_obj (t, "layer");
                pcb_append_txt (e, layer);
-               if (*layer == 'B')
-               {
                   e = pcb_append_obj (t, "effects");
                   e = pcb_append_obj (e, "justify");
+                  pcb_append_lit (e, "left");
+		  if(*layer=='B')
                   pcb_append_lit (e, "mirror");
-               }
                free (map);
             }
             pcb_delete (o);
