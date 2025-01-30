@@ -1,3 +1,6 @@
 [submodule "QR"]
 	path = QR
 	url = https://github.com/revk/QR
+[submodule "Datamatrix"]
+	path = Datamatrix
+	url = https://github.com/revk/Datamatrix
