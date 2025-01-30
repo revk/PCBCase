@@ -20,7 +20,7 @@
 #include "iec16022ecc200.h"
 
 int
-main(int argc, const char *argv[])
+main (int argc, const char *argv[])
 {
    const char     *infile = NULL;
    const char     *outfile = NULL;
@@ -45,28 +45,28 @@ main(int argc, const char *argv[])
          POPT_AUTOHELP {}
       };
 
-      optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
+      optCon = poptGetContext (NULL, argc, argv, optionsTable, 0);
       /* poptSetOtherOptionHelp(optCon, ""); */
 
-      int             c;
-      if ((c = poptGetNextOpt(optCon)) < -1)
-         errx(1, "%s: %s\n", poptBadOption(optCon, POPT_BADOPTION_NOALIAS), poptStrerror(c));
+      int c;
+      if ((c = poptGetNextOpt (optCon)) < -1)
+         errx (1, "%s: %s\n", poptBadOption (optCon, POPT_BADOPTION_NOALIAS), poptStrerror (c));
 
-      if (poptPeekArg(optCon) && !infile)
-         infile = poptGetArg(optCon);
+      if (poptPeekArg (optCon) && !infile)
+         infile = poptGetArg (optCon);
 
-      if (poptPeekArg(optCon) && !outfile)
-         outfile = poptGetArg(optCon);
+      if (poptPeekArg (optCon) && !outfile)
+         outfile = poptGetArg (optCon);
 
-      if (poptPeekArg(optCon) || !infile)
+      if (poptPeekArg (optCon) || !infile)
       {
-         poptPrintUsage(optCon, stderr, 0);
+         poptPrintUsage (optCon, stderr, 0);
          return -1;
       }
    }
-   pcb_t          *pcb = pcb_load(infile);
-   if (strcmp(pcb->tag, "kicad_pcb"))
-      errx(1, "Not a kicad_pcb (%s)", pcb->tag);
+   pcb_t *pcb = pcb_load (infile);
+   if (strcmp (pcb->tag, "kicad_pcb"))
+      errx (1, "Not a kicad_pcb (%s)", pcb->tag);
 
    int             zap(const char *layer, const char *newlayer)
    { // Zap a layer
@@ -74,19 +74,19 @@ main(int argc, const char *argv[])
 pcb_t *         check(pcb_t * parent, const char *tag, pcb_t * o)
       {
          if (!o)
-            o = pcb_find(parent, tag, o);       /* First */
+            o = pcb_find (parent, tag, o);      /* First */
          if (!o)
             return o;
-         pcb_t          *n = pcb_find(parent, tag, o);  /* Next */
-         pcb_t          *l = pcb_find(o, "layer", NULL);
-         if              (!l || l->valuen != 1 || !l->values[0].istxt || strcmp(l->values[0].txt, layer))
-                            return n;   /* Not found */
-                         found++;
-         if              (newlayer)
-                            l->values[0].txt = pcb_add_string(newlayer, NULL);
+         pcb_t *n = pcb_find (parent, tag, o);  /* Next */
+         pcb_t *l = pcb_find (o, "layer", NULL);
+         if (!l || l->valuen != 1 || !l->values[0].istxt || strcmp (l->values[0].txt, layer))
+            return n;           /* Not found */
+         found++;
+         if (newlayer)
+            l->values[0].txt = pcb_add_string (newlayer, NULL);
          else
-                            pcb_delete(o);
-                         return n;
+            pcb_delete (o);
+         return n;
       }
       pcb_t          *o = NULL;
       while           ((o = check(pcb, "dimension", o)));
@@ -160,40 +160,40 @@ localtime_r(&now,&tm);
 	    if(!map)warnx("QR fails %s",val);
 	    else
             {
-               double          u = (double)qrsize / w;
-               unsigned char  *p = map;
-               for             (int y = 0; y < w; y++)
-                  for             (int x = 0; x < w; x++)
-if              (*(p++) & QR_TAG_BLACK)
+               double u = (double) qrsize / w;
+               unsigned char *p = map;
+               for (int y = 0; y < w; y++)
+                  for (int x = 0; x < w; x++)
+                     if (*(p++) & QR_TAG_BLACK)
                      {
-                        pcb_t          *e,
-                                       *r = pcb_append_obj(pcb, "gr_rect");
-                                        e = pcb_append_obj(r, "start");
-                                        pcb_append_num(e, *layer == 'B' ? ex - u * x : sx + u * x);
-                                        pcb_append_num(e, sy + u * y);
-                                        e = pcb_append_obj(r, "end");
-                                        pcb_append_num(e, *layer == 'B' ? ex - u * (x + 1) : sx + u * (x + 1));
-                                        pcb_append_num(e, sy + u * (y + 1));
-                                        e = pcb_append_obj(r, "fill");
-                                        pcb_append_lit(e, "yes");
-                                        e = pcb_append_obj(r, "layer");
-                                        pcb_append_txt(e, layer);
+                        pcb_t *e,
+                         *r = pcb_append_obj (pcb, "gr_rect");
+                        e = pcb_append_obj (r, "start");
+                        pcb_append_num (e, *layer == 'B' ? ex - u * x : sx + u * x);
+                        pcb_append_num (e, sy + u * y);
+                        e = pcb_append_obj (r, "end");
+                        pcb_append_num (e, *layer == 'B' ? ex - u * (x + 1) : sx + u * (x + 1));
+                        pcb_append_num (e, sy + u * (y + 1));
+                        e = pcb_append_obj (r, "fill");
+                        pcb_append_lit (e, "yes");
+                        e = pcb_append_obj (r, "layer");
+                        pcb_append_txt (e, layer);
                      }
-               pcb_t          *e,
-                              *t = pcb_append_obj(pcb, "gr_text");
-                               pcb_append_txt(t, tag);
-                               e = pcb_append_obj(t, "at");
-                               pcb_append_num(e, (sx + ex) / 2);
-                               pcb_append_num(e, ey + 1.5);
-                               e = pcb_append_obj(t, "layer");
-                               pcb_append_txt(e, layer);
-               if              (*layer == 'B')
+               pcb_t *e,
+                *t = pcb_append_obj (pcb, "gr_text");
+               pcb_append_txt (t, tag);
+               e = pcb_append_obj (t, "at");
+               pcb_append_num (e, (sx + ex) / 2);
+               pcb_append_num (e, ey + 1.5);
+               e = pcb_append_obj (t, "layer");
+               pcb_append_txt (e, layer);
+               if (*layer == 'B')
                {
-                  e = pcb_append_obj(t, "effects");
-                  e = pcb_append_obj(e, "justify");
-                  pcb_append_lit(e, "mirror");
+                  e = pcb_append_obj (t, "effects");
+                  e = pcb_append_obj (e, "justify");
+                  pcb_append_lit (e, "mirror");
                }
-                               free(map);
+               free (map);
             }
                             free(val);
                             pcb_delete(o);
@@ -293,23 +293,23 @@ if              (*(p++) & QR_TAG_BLACK)
 }
    if              (layercase)
    {                            /* Replace Edge.Cuts with User.N */
-      char            casework[20];
-      sprintf(casework, "User.%d", layercase);
-      zap("Edge.Cuts", NULL);
-      if (!zap(casework, "Edge.Cuts"))
-         errx(1, "Edge not found");
+      char casework[20];
+      sprintf (casework, "User.%d", layercase);
+      zap ("Edge.Cuts", NULL);
+      if (!zap (casework, "Edge.Cuts"))
+         errx (1, "Edge not found");
    }
    /* Clean up things that do not look good */
-   zap("Dwgs.User", NULL);
-   zap("Cmts.User", NULL);
+   zap ("Dwgs.User", NULL);
+   zap ("Cmts.User", NULL);
    if (!eco1)
-      zap("Eco1.User", NULL);
-   zap("Eco2.User", NULL);
-   zap("F.Fab", NULL);
-   zap("B.Fab", NULL);
+      zap ("Eco1.User", NULL);
+   zap ("Eco2.User", NULL);
+   zap ("F.Fab", NULL);
+   zap ("B.Fab", NULL);
    if (outfile)
-      pcb_write(outfile, pcb);
-   pcb = pcb_free(pcb);
-   poptFreeContext(optCon);
+      pcb_write (outfile, pcb);
+   pcb = pcb_free (pcb);
+   poptFreeContext (optCon);
    return 0;
 }
