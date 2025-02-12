@@ -245,7 +245,7 @@ main (int argc, const char *argv[])
             unsigned int w = dmw,
                h = dmh;
             char val[18];
-            snprintf (val, sizeof (val), "01%02d%02d%02d%05d%s", tm.tm_year % 100, tm.tm_mon + 1, tm.tm_mday, now / 10000 % 100000, nnnn);      // Like the code they use
+            snprintf (val, sizeof (val), "%d0%02d%02d%02d%05d%s", *o2->values[0].txt == 'F' ? 1 : 2 tm.tm_year % 100, tm.tm_mon + 1, tm.tm_mday, now / 10000 % 100000, nnnn);   // Like the code they use
           unsigned char *map = iec16022ecc200 (&w, &h, barcodelen: strlen (val), barcode: val, noquiet:1);
             if (!map)
                warnx ("Datamatrix failed %s", val);
