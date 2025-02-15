@@ -178,10 +178,15 @@ pcb_stream (FILE * o, pcb_t * pcb, int l)
          fprintf (o, "\"%s\"", v->txt);
       else if (v->isnum)
       {
-         if (v->num == round (v->num))
-            fprintf (o, "%.0lf", v->num);
-         else
-            fprintf (o, "%lf", v->num);
+         char temp[50];
+         sprintf (temp, "%lf", v->num);
+         char *p = temp + strlen (temp);
+         while (p > temp && p[-1] == '0')
+            p--;
+         if (p > temp && p[-1] == '.')
+            p--;
+         *p = 0;
+         fprintf (o, "%s", temp);
       } else if (v->isbool)
          fprintf (o, "%s", v->istrue ? "true" : "false");
    }
