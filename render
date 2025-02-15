@@ -7,14 +7,15 @@ setenv BOARD "$BASE:t"
 setenv TMP `mktemp -u`.kicad_pcb
 setenv PNG `mktemp -u`.png
 setenv QR "PCB-$BOARD-`date +%Y-%m-%d`"
+setenv BARCODE "--dm --qr='$QR'"
 
 # Main view
-$0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --dm --qr="$QR"
+$0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" "$BARCODE"
 /Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,0,30' $ARGS
 /Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
 
 # See if there is a panel (User.2)
-$0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --case=2 --dm --qr="$QR"
+$0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --case=2 "$BARCODE"
 if(! $status) then
 	# There is a panel, so this is panel, and we need to render cut out as main
 	setenv panel
@@ -30,20 +31,20 @@ mv -f "$PNG" "$BASE.png"
 mv -f "$PNG" "$BASE-90.png"
 
 # Bottom view
-$0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --case=2 --dm --qr="$QR"
+$0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --case=2 "$BARCODE"
 /Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,180,-30' $ARGS
 /Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
 mv -f "$PNG" "$BASE-bottom.png"
 
 if($?panel) then
-	$0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --dm --qr="$QR" --eco-1
+	$0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" "$BARCODE"
 	/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,180,-30' $ARGS
 	/Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
 	mv -f "$PNG" "$BASE-panel-bottom.png"
 endif
 
 # Alt cut out view
-$0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --case=4 --dm --qr="$QR"
+$0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --case=4 "$BARCODE"
 if(! $status) then
 	/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,0,30' $ARGS
 	/Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
@@ -51,7 +52,7 @@ if(! $status) then
 	/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,0,-60' $ARGS
 	/Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
 	mv -f "$PNG" "$BASE-alt-90.png"
-	$0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --case=4 --dm --qr="$QR" --eco-1
+	$0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" --case=4 "$BARCODE"
 	/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,180,-30' $ARGS
 	/Applications/GIMP-2.10.app/Contents/MacOS/gimp -i -b '(crop-png "'"$PNG"'")' -b '(gimp-quit 0)'
 	mv -f "$PNG" "$BASE-alt-bottom.png"
