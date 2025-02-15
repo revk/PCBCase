@@ -157,7 +157,7 @@ pcb_stream (FILE * o, pcb_t * pcb, int l)
    {
       fputc ('\n', o);
       for (int q = 0; q < l; q++)
-         fputc (' ', o);
+         fputc ('\t', o);
    }
    if (l)
       nl ();
