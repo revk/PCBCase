@@ -164,13 +164,15 @@ pcb_stream (FILE * o, pcb_t * pcb, int l)
    fprintf (o, "(%s", pcb->tag);
    for (int n = 0; n < pcb->valuen; n++)
    {
-      fputc (' ', o);
       pcb_val_t *v = &pcb->values[n];
       if (v->isobj)
       {
          sub = 1;
          pcb_stream (o, v->obj, l + 1);
-      } else if (v->islit)
+         continue;
+      }
+      fputc (' ', o);
+      if (v->islit)
          fprintf (o, "%s", v->txt);
       else if (v->istxt)
          fprintf (o, "\"%s\"", v->txt);
@@ -185,7 +187,9 @@ pcb_stream (FILE * o, pcb_t * pcb, int l)
    }
    if (sub)
       nl ();
-   fprintf (o, ")");
+   fputc (')', o);
+   if (!l)
+      fputc ('\n', o);
 }
 
 void
