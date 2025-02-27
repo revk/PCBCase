@@ -9,6 +9,8 @@ setenv PNG `mktemp -u`.png
 setenv QR "PCB-$BOARD-`date +%Y-%m-%d`"
 setenv BARCODE "--dm --qr='$QR'"
 
+# Note scm files to /Users/adrian//Library/Application Support/GIMP/2.10/scripts/
+
 # Main view
 $0:h/clean -i "$BASE.kicad_pcb" -o "$TMP" $BARCODE
 /Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli pcb render -o "$PNG" "$TMP" --perspective --rotate ' -40,0,30' $ARGS
