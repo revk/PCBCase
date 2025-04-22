@@ -19,6 +19,7 @@
 
 /* yes, all globals, what the hell */
 int debug = 0;
+int dnp=0;
 int norender = 0;
 int layerpcb = 0;
 int layercase = 0;
@@ -222,6 +223,17 @@ write_scad (pcb_t * pcb)
       pcb_t *fp = NULL;
       while ((fp = pcb_find (pcb, "footprint", fp)))
       {
+	      if(!dnp)
+	      {
+         o2 = pcb_find (fp, "attr", NULL);
+	 if(o2)
+	 {
+		 int i;
+		 for(i=0;i<o2->valuen;i++)
+			 if(o2->values[i].islit&&!strcmp(o2->values[i].txt,"dnp"))break;
+		 if(i<o2->valuen)continue;
+	 }
+	      }
          o2 = pcb_find (fp, "at", NULL);
          if (!o2 || o2->valuen < 2 || !o2->values[0].isnum || !o2->values[1].isnum)
             continue;
@@ -535,6 +547,17 @@ write_scad (pcb_t * pcb)
       o = NULL;
       while ((o = pcb_find (pcb, "footprint", o)))
       {
+	      if(!dnp)
+		      {
+         o2 = pcb_find (o, "attr", NULL);
+	 if(o2)
+	 {
+		 int i;
+		 for(i=0;i<o2->valuen;i++)
+			 if(o2->values[i].islit&&!strcmp(o2->values[i].txt,"dnp"))break;
+		 if(i<o2->valuen)continue;
+	 }
+		      }
          char back = 0;         /* back of board */
          if (!(o2 = pcb_find (o, "layer", NULL)) || o2->valuen != 1 || !o2->values[0].istxt)
             continue;
@@ -736,6 +759,7 @@ main (int argc, const char *argv[])
          {"spacing", 's', POPT_ARG_DOUBLE, &spacing, 0, "Spacing (default: auto)", "mm"},
          {"curve-delta", 'D', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &delta, 0, "Curve delta", "mm"},
          {"no-render", 'n', POPT_ARG_NONE, &norender, 0, "No-render, just define base() and top()"},
+         {"dnp", 0, POPT_ARG_NONE, &dnp, 0, "Include DNP"},
          {"debug", 'v', POPT_ARG_NONE, &debug, 0, "Debug"},
          POPT_AUTOHELP {}
       };
