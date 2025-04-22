@@ -223,19 +223,6 @@ write_scad (pcb_t * pcb)
       pcb_t *fp = NULL;
       while ((fp = pcb_find (pcb, "footprint", fp)))
       {
-         if (!dnp)
-         {
-            o2 = pcb_find (fp, "attr", NULL);
-            if (o2)
-            {
-               int i;
-               for (i = 0; i < o2->valuen; i++)
-                  if (o2->values[i].islit && !strcmp (o2->values[i].txt, "dnp"))
-                     break;
-               if (i < o2->valuen)
-                  continue;
-            }
-         }
          o2 = pcb_find (fp, "at", NULL);
          if (!o2 || o2->valuen < 2 || !o2->values[0].isnum || !o2->values[1].isnum)
             continue;
