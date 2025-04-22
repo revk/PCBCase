@@ -1,0 +1,16 @@
+if(part)
+{
+	intersection()
+	{
+    	translate([0,0,0.95])cube([7.4,7.5,1.9],center=true);
+    	translate([0,0,0.99])rotate([0,0,45])cube([8.5,8.5,2],center=true);
+	}
+}
+if(hole)
+{
+	cylinder(d=5,h=height,$fn=24);
+}
+if(block)
+{
+	translate([0,0,2])cylinder(d=7,h=height,$fn=24);
+}
