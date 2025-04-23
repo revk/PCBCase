@@ -1,0 +1,8 @@
+if(part)
+{
+	translate([0,0,-2.5])cylinder(d=3.5,h=2.5,$fn=24);
+}
+if(hole)
+{
+	cylinder(d=3,h=8.5,$fn=24);
+}
