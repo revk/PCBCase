@@ -322,8 +322,8 @@ write_scad (pcb_t * pcb)
             cuts[b].used = 1;
             if (!started || x1 != x || y1 != y)
             {
-               if (start >= 0)
-                  warnx ("Not closed path (%lf,%lf) %s %s", x1, y1, tag, layer);
+               if (start >= 0 && tag)
+                  warnx ("Not closed path (%lf,%lf) %s %s", x1, y1, layer);
                start = addpoint ((x = x1) - lx, ry - (y = y1));
                if (started)
                   fprintf (pa, "],");
