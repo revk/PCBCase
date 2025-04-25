@@ -323,7 +323,7 @@ write_scad (pcb_t * pcb)
             if (!started || x1 != x || y1 != y)
             {
                if (start >= 0)
-                  warnx ("Not closed path (%lf,%lf)", x1, y1);
+                  warnx ("Not closed path (%lf,%lf) %s %s", x1, y1, tag, layer);
                start = addpoint ((x = x1) - lx, ry - (y = y1));
                if (started)
                   fprintf (pa, "],");
