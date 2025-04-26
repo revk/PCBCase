@@ -1,7 +1,8 @@
 // Cable socket
 if(hole)
 {
-	b(45+3,1.11-10,0,6,20,height+1);
+	b(43+3,1.11-10,0,10+1,20+1,height+1);
+	b(34,8.89,0,5,13,height+1);
 }
 // Header
 N=8;
