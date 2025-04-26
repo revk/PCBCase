@@ -21,11 +21,11 @@ if(hole)
 // Screws
 if(part)
 {
-	for(x=[0.1,53.1])for(y=[6.11,23.89])
+	for(x=[0.1,53.1])for(y=[6.11,-23.89])
 	translate([x,y,-2.5])cylinder(d=3.5,h=2.5,$fn=24);
 }
 if(hole)
 {
-	for(x=[0.1,53.1])for(y=[6.11,23.89])
+	for(x=[0.1,53.1])for(y=[6.11,-23.89])
 	translate([x,y,0])cylinder(d=3.5,h=8.5,$fn=24);
 }
