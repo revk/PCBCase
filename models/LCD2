@@ -15,14 +15,14 @@ if(part)
 if(hole)
 {
 	b(0,0,0,2.54+0.2,N*2.54+0.4,height);
-	for(x=[0:1:N-1])translate([0,(x-(N-1)/2)*2.54,-2.5])cylinder(r1=0.5,r2=1,h=1.5);
+	for(x=[0:1:N-1])translate([0,(x-(N-1)/2)*2.54,-2.4])cylinder(r1=0.5,r2=1,h=1.5);
 }
 }
 // Screws
 if(part)
 {
 	for(x=[0.1,53.1])for(y=[6.11,-23.89])
-	translate([x,y,-2.5])cylinder(d=3.5,h=2.5,$fn=24);
+	translate([x,y,-2.4])cylinder(d=3.5,h=2.5,$fn=24);
 }
 if(hole)
 {
