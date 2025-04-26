@@ -2,6 +2,7 @@ if(hole)
 {
 	b(45+3,1.11-10,0,6,20,height+1);
 }
+N=8;
 translate([0,-(N-1)*2.54/2,0])
 {
 if(part)
