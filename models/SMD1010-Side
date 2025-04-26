@@ -13,5 +13,5 @@ if(hole)
 }
 if(block)
 {
-    b(0,0,0,4,4,height);
+    b(0,0,.8,4,4,height);
 }
