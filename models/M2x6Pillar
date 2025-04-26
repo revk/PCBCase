@@ -4,5 +4,5 @@ if(part)
 }
 if(hole)
 {
-	cylinder(d=3,h=8.5,$fn=24);
+	cylinder(d=3.5,h=8.5,$fn=24);
 }
