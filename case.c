@@ -459,6 +459,8 @@ write_scad (pcb_t * pcb)
    }
    int add_module (const char *fn, const char *a, const char *b, char **numberp)
    {                            // Check module with substitution for ℕ
+         if (numberp)
+            *numberp = NULL;
       const char *f = fn;
       while (*f)
       {
@@ -483,7 +485,7 @@ write_scad (pcb_t * pcb)
          }
          if (numberp)
          {
-            *numberp = NULL;
+	    free(*numberp);
             size_t len;
             FILE *o = open_memstream (numberp, &len);
             while (q < f)
