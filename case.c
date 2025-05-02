@@ -46,7 +46,7 @@ copy_file (FILE * o, const char *fn)
 {
    int f = open (fn, O_RDONLY);
    if (f < 0)
-      err (1, "Cannot open copy %s", fn);
+      err (1, "Cannot open copy [%s]", fn);
    struct stat s;
    if (fstat (f, &s))
       err (1, "Cannot stat %s", fn);
