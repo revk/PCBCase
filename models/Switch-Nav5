@@ -8,21 +8,21 @@ if(part)
 }
 if(hole)
 {
-	translate([0,0,2])rotate([0,0,45])
+	translate([0,0,1])rotate([0,0,45])
 	{
-		rotate([10,0,0])cylinder(d=6,h=height,$fn=24);
-		rotate([-10,0,0])cylinder(d=6,h=height,$fn=24);
-		rotate([0,10,0])cylinder(d=6,h=height,$fn=24);
-		rotate([0,-10,0])cylinder(d=6,h=height,$fn=24);
+		rotate([15,0,0])cylinder(d=7,h=height,$fn=24);
+		rotate([-15,0,0])cylinder(d=7,h=height,$fn=24);
+		rotate([0,15,0])cylinder(d=7,h=height,$fn=24);
+		rotate([0,-15,0])cylinder(d=7,h=height,$fn=24);
 	}
 }
 if(block)
 {
-	translate([0,0,2])rotate([0,0,45])
+	translate([0,0,1])rotate([0,0,45])
 	{
-		rotate([10,0,0])cylinder(d=8,h=height,$fn=24);
-		rotate([-10,0,0])cylinder(d=8,h=height,$fn=24);
-		rotate([0,10,0])cylinder(d=8,h=height,$fn=24);
-		rotate([0,-10,0])cylinder(d=8,h=height,$fn=24);
+		rotate([15,0,0])cylinder(d=8,h=height,$fn=24);
+		rotate([-15,0,0])cylinder(d=8,h=height,$fn=24);
+		rotate([0,15,0])cylinder(d=8,h=height,$fn=24);
+		rotate([0,-15,0])cylinder(d=8,h=height,$fn=24);
 	}
 }
