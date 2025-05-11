@@ -40,6 +40,8 @@ double spacing = 0;
 double delta = 0.01;
 double hullcap = 1;
 double hulledge = 1;
+double originx=NAN;
+double originy=NAN;
 
 void
 copy_file (FILE * o, const char *fn)
@@ -238,7 +240,6 @@ write_scad (pcb_t * pcb)
          while ((o = pcb_find (fp, "fp_circle", o)))
             add (o, x, y, a);
       }
-      ry = hy;
       char *points = NULL;
       size_t lpo;
       FILE *po = open_memstream (&points, &lpo);
@@ -252,6 +253,8 @@ write_scad (pcb_t * pcb)
          pointa = 0;
       int addpoint (double x, double y)
       {
+	      x=x-originx;
+	      y=originy-y;
          int p;
          for (p = 0; p < pointn && (pointx[p] != x || pointy[p] != y); p++);
          if (p == pointn)
@@ -324,7 +327,7 @@ write_scad (pcb_t * pcb)
             {
                if (start >= 0 && tag)
                   warnx ("Not closed path (%lf,%lf) (%lf,%lf) %s %s", x1, y1, x,y,layer);
-               start = addpoint ((x = x1) - lx, ry - (y = y1));
+               start = addpoint (x = x1,y = y1);
                if (started)
                   fprintf (pa, "],");
                fprintf (pa, "[%d", start);
@@ -362,7 +365,7 @@ write_scad (pcb_t * pcb)
                   for (int i = 1; i < steps; i++)
                   {
                      double a = a1 + (a2 - a1) * i / steps;
-                     int p = addpoint ((x = (cx + r * cos (a))) - lx, ry - (y = (cy + r * sin (a))));
+                     int p = addpoint (x = (cx + r * cos (a)), y = (cy + r * sin (a)));
                      if (p == start)
                         start = -1;
                      else
@@ -373,7 +376,7 @@ write_scad (pcb_t * pcb)
             started = 1;
             if (x2 != x || y2 != y)
             {
-               int p = addpoint ((x = x2) - lx, ry - (y = y2));
+               int p = addpoint (x = x2, y = y2);
                if (p == start)
                   start = -1;
                else
@@ -396,6 +399,8 @@ write_scad (pcb_t * pcb)
       free (pointy);
       free (cuts);
    }
+   double edgewidth = 0,
+      edgelength = 0;
    {
       char edgecuts[] = "Edge.Cuts";
       if (layerpcb > 0 && layerpcb < 10)
@@ -406,12 +411,6 @@ write_scad (pcb_t * pcb)
       else
          strcpy (casework, edgecuts);
       outline (edgecuts, NULL); // Gets min/max set for this - does not output
-      outline (casework, "outline");    // Updates min/max before output
-      outline (edgecuts, "pcb");        // Actually output this time
-   }
-
-   double edgewidth = 0,
-      edgelength = 0;
    if (lx < DBL_MAX)
       edgewidth = hx - lx;
    if (ly < DBL_MAX)
@@ -420,9 +419,16 @@ write_scad (pcb_t * pcb)
       spacing = edgewidth + casewall * 2 + 10;
    if (!edgewidth || !edgelength)
       errx (1, "Specify pcb size");
+		if(isnan(originx))originx=(hx+lx)/2;
+		if(isnan(originy))originy=(hy+ly)/2;
    fprintf (f, "spacing=%lf;\n", spacing);
    fprintf (f, "pcbwidth=%lf;\n", edgewidth);
    fprintf (f, "pcblength=%lf;\n", edgelength);
+   fprintf (f, "originx=%lf;\n", originx);
+   fprintf (f, "originy=%lf;\n", originy);
+      outline (casework, "outline");    // Updates min/max before output
+      outline (edgecuts, "pcb");        // Actually output this time
+   }
 
    struct
    {
@@ -534,7 +540,6 @@ write_scad (pcb_t * pcb)
    {
       const char *sidename = side ? "bottom" : "top";
       int count = 0;
-      fprintf (f, "// Parts to go on PCB (%s)\nmodule parts_%s(part=false,hole=false,block=false){\n", sidename, sidename);
       o = NULL;
       while ((o = pcb_find (pcb, "footprint", o)))
       {
@@ -609,9 +614,10 @@ write_scad (pcb_t * pcb)
          {                      // footprint level orientation
             if (debug && ref)
                warnx ("Module %s %s%s", ref, ref, back ? " (back)" : "");
+	    fprintf(f,"module part_%s(part=true,hole=false,block=false)\n{\n",ref);
             if ((o3 = pcb_find (o, "at", NULL)) && o3->valuen >= 2 && o3->values[0].isnum && o3->values[1].isnum)
             {
-               fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num - lx, ry - o3->values[1].num, back ? 0 : pcbthickness);
+               fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num - originx, originy - o3->values[1].num, back ? 0 : pcbthickness);
                if (o3->valuen >= 3 && o3->values[2].isnum)
                   fprintf (f, "rotate([0,0,%lf])", o3->values[2].num);
             }
@@ -621,11 +627,13 @@ write_scad (pcb_t * pcb)
                fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n, sidename, index, modules[n].desc, back ? "" : " (back)");
             else
                fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n, sidename, modules[n].desc, back ? "" : " (back)");
+	    fprintf(f,"};\n");
             count++;
             continue;
          }
          free (index);
 
+	    fprintf(f,"module part_%s(part=true,hole=false,block=false)\n{\n",ref);
          // Add 3D models
          int id = 0;
          while ((o2 = pcb_find (o, "model", o2)))
@@ -662,7 +670,7 @@ write_scad (pcb_t * pcb)
                n = q;
                if ((o3 = pcb_find (o, "at", NULL)) && o3->valuen >= 2 && o3->values[0].isnum && o3->values[1].isnum)
                {
-                  fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num - lx, ry - o3->values[1].num, back ? 0 : pcbthickness);
+                  fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num -originx, originy - o3->values[1].num, back ? 0 : pcbthickness);
                   if (o3->valuen >= 3 && o3->values[2].isnum)
                      fprintf (f, "rotate([0,0,%lf])", o3->values[2].num);
                }
@@ -696,6 +704,49 @@ write_scad (pcb_t * pcb)
             free (model);
             free (index);
          }
+	    fprintf(f,"};\n");
+      }
+
+      fprintf (f, "// Parts to go on PCB (%s)\nmodule parts_%s(part=false,hole=false,block=false){\n", sidename, sidename);
+      o = NULL;
+      while ((o = pcb_find (pcb, "footprint", o)))
+      {
+         if (!dnp)
+         {
+            o2 = pcb_find (o, "attr", NULL);
+            if (o2)
+            {
+               int i;
+               for (i = 0; i < o2->valuen; i++)
+                  if (o2->values[i].islit && !strcmp (o2->values[i].txt, "dnp"))
+                     break;
+               if (i < o2->valuen)
+                  continue;
+            }
+         }
+         char back = 0;         /* back of board */
+         if (!(o2 = pcb_find (o, "layer", NULL)) || o2->valuen != 1 || !o2->values[0].istxt)
+            continue;
+         if (!strcmp (o2->values[0].txt, "B.Cu"))
+            back = 1;
+         else if (strcmp (o2->values[0].txt, "F.Cu"))
+            continue;
+         if (side != back)
+            continue;
+         // Find part reference
+         const char *ref = NULL;
+         o2 = NULL;
+         while ((o2 = pcb_find (o, "property", o2)))
+         {
+            if (o2->valuen >= 2 && o2->values[0].istxt && !strcmp (o2->values[0].txt, "Reference") && o2->values[1].istxt)
+            {
+               ref = o2->values[1].txt;
+               break;
+            }
+         }
+         if (checkignore (ref))
+            continue;
+	 fprintf(f,"part_%s(part,hole,block);\n",ref);
       }
       fprintf (f, "}\n\n");
       fprintf (f, "parts_%s=%d;\n", sidename, count);
@@ -753,6 +804,8 @@ main (int argc, const char *argv[])
          {"curve-delta", 'D', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &delta, 0, "Curve delta", "mm"},
          {"no-render", 'n', POPT_ARG_NONE, &norender, 0, "No-render, just define base() and top()"},
          {"dnp", 0, POPT_ARG_NONE, &dnp, 0, "Include DNP"},
+         {"origin-x", 'x', POPT_ARG_DOUBLE , &originx, 0, "Origin X", "mm"},
+         {"origin-y", 'y', POPT_ARG_DOUBLE , &originy, 0, "Origin Y", "mm"},
          {"debug", 'v', POPT_ARG_NONE, &debug, 0, "Debug"},
          POPT_AUTOHELP {}
       };

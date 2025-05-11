@@ -167,9 +167,19 @@ module top_edge()
 	}
 }
 
+module top_pos()
+{ // Position for plotting bottom
+	translate([casewall,casewall,pcbthickness+casetop])rotate([180,0,0])children();
+}
+
+module pcb_pos()
+{	// Position PCB relative to base 
+		translate([0,0,pcbthickness-height])children();
+}
+
 module top()
 {
-	translate([casewall,casewall+pcblength,pcbthickness+casetop])rotate([180,0,0])difference()
+	top_pos()difference()
 	{
 		union()
 		{
@@ -177,12 +187,12 @@ module top()
 			top_edge();
 		}
 		parts_space();
-		translate([0,0,pcbthickness-height])pcb(height,r=margin);
+		pcb_pos()pcb(height,r=margin);
 	}
 }
 
 module bottom_body()
-{
+{ // Position for plotting top
 	difference()
 	{
 		intersection()
@@ -214,9 +224,14 @@ module bottom_edge()
 	}
 }
 
+module bottom_pos()
+{
+	translate([casewall,casewall,casebottom])children();
+}
+
 module bottom()
 {
-	translate([casewall,casewall,casebottom])difference()
+	bottom_pos()difference()
 	{
 		union()
 		{
