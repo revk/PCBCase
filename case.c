@@ -40,8 +40,8 @@ double spacing = 0;
 double delta = 0.01;
 double hullcap = 1;
 double hulledge = 1;
-double originx=NAN;
-double originy=NAN;
+double originx = NAN;
+double originy = NAN;
 
 void
 copy_file (FILE * o, const char *fn)
@@ -253,8 +253,8 @@ write_scad (pcb_t * pcb)
          pointa = 0;
       int addpoint (double x, double y)
       {
-	      x=x-originx;
-	      y=originy-y;
+         x = x - originx;
+         y = originy - y;
          int p;
          for (p = 0; p < pointn && (pointx[p] != x || pointy[p] != y); p++);
          if (p == pointn)
@@ -326,8 +326,8 @@ write_scad (pcb_t * pcb)
             if (!started || x1 != x || y1 != y)
             {
                if (start >= 0 && tag)
-                  warnx ("Not closed path (%lf,%lf) (%lf,%lf) %s %s", x1, y1, x,y,layer);
-               start = addpoint (x = x1,y = y1);
+                  warnx ("Not closed path (%lf,%lf) (%lf,%lf) %s %s", x1, y1, x, y, layer);
+               start = addpoint (x = x1, y = y1);
                if (started)
                   fprintf (pa, "],");
                fprintf (pa, "[%d", start);
@@ -411,21 +411,23 @@ write_scad (pcb_t * pcb)
       else
          strcpy (casework, edgecuts);
       outline (edgecuts, NULL); // Gets min/max set for this - does not output
-   if (lx < DBL_MAX)
-      edgewidth = hx - lx;
-   if (ly < DBL_MAX)
-      edgelength = hy - ly;
-   if (!spacing)
-      spacing = edgewidth + casewall * 2 + 10;
-   if (!edgewidth || !edgelength)
-      errx (1, "Specify pcb size");
-		if(isnan(originx))originx=(hx+lx)/2;
-		if(isnan(originy))originy=(hy+ly)/2;
-   fprintf (f, "spacing=%lf;\n", spacing);
-   fprintf (f, "pcbwidth=%lf;\n", edgewidth);
-   fprintf (f, "pcblength=%lf;\n", edgelength);
-   fprintf (f, "originx=%lf;\n", originx);
-   fprintf (f, "originy=%lf;\n", originy);
+      if (lx < DBL_MAX)
+         edgewidth = hx - lx;
+      if (ly < DBL_MAX)
+         edgelength = hy - ly;
+      if (!spacing)
+         spacing = edgewidth + casewall * 2 + 10;
+      if (!edgewidth || !edgelength)
+         errx (1, "Specify pcb size");
+      if (isnan (originx))
+         originx = (hx + lx) / 2;
+      if (isnan (originy))
+         originy = (hy + ly) / 2;
+      fprintf (f, "spacing=%lf;\n", spacing);
+      fprintf (f, "pcbwidth=%lf;\n", edgewidth);
+      fprintf (f, "pcblength=%lf;\n", edgelength);
+      fprintf (f, "originx=%lf;\n", originx);
+      fprintf (f, "originy=%lf;\n", originy);
       outline (casework, "outline");    // Updates min/max before output
       outline (edgecuts, "pcb");        // Actually output this time
    }
@@ -465,8 +467,8 @@ write_scad (pcb_t * pcb)
    }
    int add_module (const char *fn, const char *a, const char *b, char **numberp)
    {                            // Check module with substitution for ℕ
-         if (numberp)
-            *numberp = NULL;
+      if (numberp)
+         *numberp = NULL;
       const char *f = fn;
       while (*f)
       {
@@ -491,7 +493,7 @@ write_scad (pcb_t * pcb)
          }
          if (numberp)
          {
-	    free(*numberp);
+            free (*numberp);
             size_t len;
             FILE *o = open_memstream (numberp, &len);
             while (q < f)
@@ -614,10 +616,11 @@ write_scad (pcb_t * pcb)
          {                      // footprint level orientation
             if (debug && ref)
                warnx ("Module %s %s%s", ref, ref, back ? " (back)" : "");
-	    fprintf(f,"module part_%s(part=true,hole=false,block=false)\n{\n",ref);
+            fprintf (f, "module part_%s(part=true,hole=false,block=false)\n{\n", ref);
             if ((o3 = pcb_find (o, "at", NULL)) && o3->valuen >= 2 && o3->values[0].isnum && o3->values[1].isnum)
             {
-               fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num - originx, originy - o3->values[1].num, back ? 0 : pcbthickness);
+               fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num - originx, originy - o3->values[1].num,
+                        back ? 0 : pcbthickness);
                if (o3->valuen >= 3 && o3->values[2].isnum)
                   fprintf (f, "rotate([0,0,%lf])", o3->values[2].num);
             }
@@ -627,13 +630,13 @@ write_scad (pcb_t * pcb)
                fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n, sidename, index, modules[n].desc, back ? "" : " (back)");
             else
                fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n, sidename, modules[n].desc, back ? "" : " (back)");
-	    fprintf(f,"};\n");
+            fprintf (f, "};\n");
             count++;
             continue;
          }
          free (index);
 
-	    fprintf(f,"module part_%s(part=true,hole=false,block=false)\n{\n",ref);
+         fprintf (f, "module part_%s(part=true,hole=false,block=false)\n{\n", ref);
          // Add 3D models
          int id = 0;
          while ((o2 = pcb_find (o, "model", o2)))
@@ -670,7 +673,8 @@ write_scad (pcb_t * pcb)
                n = q;
                if ((o3 = pcb_find (o, "at", NULL)) && o3->valuen >= 2 && o3->values[0].isnum && o3->values[1].isnum)
                {
-                  fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num -originx, originy - o3->values[1].num, back ? 0 : pcbthickness);
+                  fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num - originx, originy - o3->values[1].num,
+                           back ? 0 : pcbthickness);
                   if (o3->valuen >= 3 && o3->values[2].isnum)
                      fprintf (f, "rotate([0,0,%lf])", o3->values[2].num);
                }
@@ -704,7 +708,7 @@ write_scad (pcb_t * pcb)
             free (model);
             free (index);
          }
-	    fprintf(f,"};\n");
+         fprintf (f, "};\n");
       }
 
       fprintf (f, "// Parts to go on PCB (%s)\nmodule parts_%s(part=false,hole=false,block=false){\n", sidename, sidename);
@@ -746,7 +750,7 @@ write_scad (pcb_t * pcb)
          }
          if (checkignore (ref))
             continue;
-	 fprintf(f,"part_%s(part,hole,block);\n",ref);
+         fprintf (f, "part_%s(part,hole,block);\n", ref);
       }
       fprintf (f, "}\n\n");
       fprintf (f, "parts_%s=%d;\n", sidename, count);
@@ -804,8 +808,8 @@ main (int argc, const char *argv[])
          {"curve-delta", 'D', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &delta, 0, "Curve delta", "mm"},
          {"no-render", 'n', POPT_ARG_NONE, &norender, 0, "No-render, just define base() and top()"},
          {"dnp", 0, POPT_ARG_NONE, &dnp, 0, "Include DNP"},
-         {"origin-x", 'x', POPT_ARG_DOUBLE , &originx, 0, "Origin X", "mm"},
-         {"origin-y", 'y', POPT_ARG_DOUBLE , &originy, 0, "Origin Y", "mm"},
+         {"origin-x", 'x', POPT_ARG_DOUBLE, &originx, 0, "Origin X", "mm"},
+         {"origin-y", 'y', POPT_ARG_DOUBLE, &originy, 0, "Origin Y", "mm"},
          {"debug", 'v', POPT_ARG_NONE, &debug, 0, "Debug"},
          POPT_AUTOHELP {}
       };
