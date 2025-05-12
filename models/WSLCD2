@@ -24,7 +24,8 @@ translate([-29,17.5,8.25]) rotate([180,0,0])
         // Screws / Pillars
         for(x=[2.5,55.5])for(y=[2.5,32.5])translate([x,y,0])
         {
-        	translate([0,0,-2.4])cylinder(d=4,h=1.5,$fn=24);
+        	translate([0,0,-2.5])cylinder(d=4,h=1.5,$fn=24);
         	translate([0,0,-2])cylinder(d=2,h=3,$fn=24);
+        	translate([0,0,6.5])cylinder(d=2,h=3,$fn=24);
         }
 }
