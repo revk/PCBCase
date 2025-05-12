@@ -26,6 +26,6 @@ translate([-29,17.5,8.25]) rotate([180,0,0])
         {
         	translate([0,0,-2.5])cylinder(d=4,h=1.5,$fn=24);
         	translate([0,0,-2])cylinder(d=2,h=3,$fn=24);
-        	translate([0,0,6.5])cylinder(d=4,h=1.5,$fn=24);
+        	translate([0,0,7.5])cylinder(d=4,h=1.5,$fn=24);
         }
 }
