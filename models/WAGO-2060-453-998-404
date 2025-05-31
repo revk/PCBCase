@@ -7,11 +7,22 @@ if(part)
 		b(0,0,0,12.7,N*4-0.1,1);
 		translate([0.8,0,0])b(0,0,0,11.1,N*4-0.1,4.5);
 	}
-	for(p=[0:N-1])translate([0,-4*(N-1)/2+p*4,2])
-		rotate([90,0,-90])cylinder(d=3,h=20);
+	for(p=[0:N-1])hull()
+    {
+        translate([-6,-4*(N-1)/2+p*4,2])sphere(d=3);
+        translate([-10,0,2])sphere(d=4);
+    }
+    hull()
+    {
+        translate([-10,0,2])sphere(d=4);
+        translate([-50,0,2])sphere(d=4);
+    }
 }
 if(hole)
 {
-	for(p=[0:N-1])translate([0,-4*(N-1)/2+p*4,2])
-		translate([-10,0,0])rotate([180,0,-90])cylinder(d=3,h=20);
+    hull()
+    {
+        translate([-10,0,2])sphere(d=4);
+        translate([-10,0,-height])sphere(d=4);
+    }
 }

@@ -10,19 +10,19 @@ if(hole)
 {
 	translate([0,0,1])rotate([0,0,45])
 	{
-		rotate([15,0,0])cylinder(d=7,h=height,$fn=24);
-		rotate([-15,0,0])cylinder(d=7,h=height,$fn=24);
-		rotate([0,15,0])cylinder(d=7,h=height,$fn=24);
-		rotate([0,-15,0])cylinder(d=7,h=height,$fn=24);
+		rotate([15,0,0])cylinder(d=7,h=height,$fn=8);
+		rotate([-15,0,0])cylinder(d=7,h=height,$fn=8);
+		rotate([0,15,0])cylinder(d=7,h=height,$fn=8);
+		rotate([0,-15,0])cylinder(d=7,h=height,$fn=8);
 	}
 }
 if(block)
 {
 	translate([0,0,1])rotate([0,0,45])
 	{
-		rotate([15,0,0])cylinder(d=8,h=height,$fn=24);
-		rotate([-15,0,0])cylinder(d=8,h=height,$fn=24);
-		rotate([0,15,0])cylinder(d=8,h=height,$fn=24);
-		rotate([0,-15,0])cylinder(d=8,h=height,$fn=24);
+		rotate([15,0,0])cylinder(d=8,h=height,$fn=8);
+		rotate([-15,0,0])cylinder(d=8,h=height,$fn=8);
+		rotate([0,15,0])cylinder(d=8,h=height,$fn=8);
+		rotate([0,-15,0])cylinder(d=8,h=height,$fn=8);
 	}
 }
