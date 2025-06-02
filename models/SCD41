@@ -11,3 +11,7 @@ if(hole)
 {
 		for(x=[-2,2])for(y=[-2,2])translate([x,y,1])cylinder(d=2,h=height,$fn=8);
 }
+if(block)
+{
+	b(0,0,0,12,12,height+1);
+}
