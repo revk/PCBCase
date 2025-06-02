@@ -1,5 +1,5 @@
 // WAGO-2060-45x-998-404
-N=2;
+N=3;
 if(part)
 {
 	translate([-0.9,0,0])hull()
@@ -12,11 +12,6 @@ if(part)
         translate([-6,-4*(N-1)/2+p*4,2])sphere(d=3,$fn=12);
         translate([-11.510,0,2])sphere(d=4,$fn=12);
     }
-    hull()
-    {
-        translate([-11.510,0,2])sphere(d=4,$fn=12);
-        translate([-50,0,2])sphere(d=4,$fn=12);
-    }
 }
 if(hole)
 {
@@ -24,5 +19,10 @@ if(hole)
     {
         translate([-11.510,0,2])sphere(d=4,$fn=12);
         translate([-11.510,0,-height])sphere(d=4,$fn=12);
+    }
+    hull()
+    {
+        translate([-11.510,0,2])sphere(d=4,$fn=12);
+        translate([-50,0,2])sphere(d=4,$fn=12);
     }
 }
