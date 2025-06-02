@@ -68,7 +68,7 @@ module top_side_hole()
 			parts_top(hole=true);
 			case_wall();
 		}
-		translate([0,0,-casebottom])pcb(height,casewall-edge);
+		translate([0,0,-casebottom])pcb_hulled(height,casewall-edge);
 	}
 }
 
@@ -81,7 +81,7 @@ module bottom_side_hole()
 			parts_bottom(hole=true);
 			case_wall();
 		}
-		translate([0,0,edge-casebottom])pcb(height-edge*2,casewall);
+		translate([0,0,edge-casebottom])pcb_hulled(height-edge*2,casewall);
 	}
 }
 
