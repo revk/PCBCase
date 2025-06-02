@@ -1,5 +1,5 @@
-// WAGO-2060-453-998-404
-N=3;
+// WAGO-2060-45x-998-404
+N=2;
 if(part)
 {
 	translate([-0.9,0,0])hull()
@@ -10,11 +10,11 @@ if(part)
 	for(p=[0:N-1])hull()
     {
         translate([-6,-4*(N-1)/2+p*4,2])sphere(d=3,$fn=12);
-        translate([-10,0,2])sphere(d=4,$fn=12);
+        translate([-11.510,0,2])sphere(d=4,$fn=12);
     }
     hull()
     {
-        translate([-10,0,2])sphere(d=4,$fn=12);
+        translate([-11.510,0,2])sphere(d=4,$fn=12);
         translate([-50,0,2])sphere(d=4,$fn=12);
     }
 }
@@ -22,7 +22,7 @@ if(hole)
 {
     hull()
     {
-        translate([-10,0,2])sphere(d=4,$fn=12);
-        translate([-10,0,-height])sphere(d=4,$fn=12);
+        translate([-11.510,0,2])sphere(d=4,$fn=12);
+        translate([-11.510,0,-height])sphere(d=4,$fn=12);
     }
 }
