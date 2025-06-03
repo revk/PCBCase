@@ -150,7 +150,7 @@ module top_body()
 		{
 			solid_case();
 			pcb_hulled(height);
-			top_half(true);
+			top_half();
 		}
 		if(parts_top)minkowski()
 		{
@@ -207,7 +207,7 @@ module bottom_body()
 		{
 			solid_case();
 			translate([0,0,-height])pcb_hulled(height);
-			bottom_half(true);
+			bottom_half();
 		}
 		if(parts_bottom)minkowski()
 		{
