@@ -4,10 +4,10 @@ if(part)
 }
 if(hole)
 {
-	translate([0.71,0,-pcbthickness-0.01])
-		hull()
-		{
-			cylinder(d=1,h=pcbthickness+0.02);
-			translate([0.75+casewall+1,0,0])cylinder(d=1,h=pcbthickness+0.02);
-		}
+	translate([0,-0.71,-pcbthickness-0.01])
+	hull()
+	{
+		cylinder(d=1,h=pcbthickness+0.02);
+		translate([0,-10+casewall+1,0])cylinder(d=1,h=pcbthickness+0.02);
+	}
 }
