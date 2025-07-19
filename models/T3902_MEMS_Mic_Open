@@ -1,0 +1,13 @@
+if(part)
+{
+	b(0,0,0,2.65,3.5,0.98);
+}
+if(hole)
+{
+	translate([0,-0.71,-pcbthickness-0.01])
+	hull()
+	{
+		cylinder(d=1,h=pcbthickness+0.02);
+		translate([0,-10+casewall+1,0])cylinder(d=1,h=pcbthickness+0.02);
+	}
+}
