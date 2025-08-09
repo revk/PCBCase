@@ -40,7 +40,7 @@ module top_half(step=false)
 	difference()
 	{
 		translate([-casebottom-100,-casewall-100,pcbthickness-lip/2+0.01]) cube([pcbwidth+casewall*2+200,pcblength+casewall*2+200,height]);
-		if(step)translate([0,0,pcbthickness-lip/2-0.03])
+		if(step)translate([0,0,pcbthickness-lip])
         	{
             		difference()
             		{
@@ -48,7 +48,7 @@ module top_half(step=false)
                 		pcb_hulled(lip,casewall/2+fit);
 				for(a=[0,180])rotate(a)hull()
                 		{
-                            		translate([lip/2,lip/2,-lip])cube([pcbwidth,pcblength,0]);
+                            		translate([lip/2,lip/2,0])cube([pcbwidth,pcblength,lip]);
                             		translate([-lip/2,-lip/2,lip])cube([pcbwidth,pcblength,lip]);
                 		}
             		}
@@ -57,7 +57,7 @@ module top_half(step=false)
                 		pcb_hulled(lip,casewall/2+fit);
 				for(a=[90,270])rotate(a)hull()
                 		{
-                            		translate([lip/2,lip/2,-lip])cube([pcblength,pcbwidth,0]);
+                            		translate([lip/2,lip/2,0])cube([pcblength,pcbwidth,lip]);
                             		translate([-lip/2,-lip/2,lip])cube([pcblength,pcbwidth,lip]);
                 		}
 			}
