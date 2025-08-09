@@ -21,6 +21,8 @@
 int debug = 0;
 int dnp = 0;
 int norender = 0;
+int toponly = 0;
+int bottomonly = 0;
 int layerpcb = 0;
 int layercase = 0;
 int nohull = 0;
@@ -774,7 +776,11 @@ write_scad (pcb_t * pcb)
 
    if (debug)
       fprintf (f, "translate([spacing*2,0,0])preview();\n");
-   if (!norender)
+   if (toponly)
+      fprintf (f, "top();\n");
+   else if (bottomonly)
+      fprintf (f, "bottom();\n");
+   else if (!norender)
       fprintf (f, "bottom(); translate([spacing,0,0])top();\n");
 
    if (f != stdout)
@@ -807,6 +813,8 @@ main (int argc, const char *argv[])
          {"spacing", 's', POPT_ARG_DOUBLE, &spacing, 0, "Spacing (default: auto)", "mm"},
          {"curve-delta", 'D', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &delta, 0, "Curve delta", "mm"},
          {"no-render", 'n', POPT_ARG_NONE, &norender, 0, "No-render, just define base() and top()"},
+         {"bottom-only", 'B', POPT_ARG_NONE, &bottomonly, 0, "Botton only"},
+         {"top-only", 'T', POPT_ARG_NONE, &toponly, 0, "Top only"},
          {"dnp", 0, POPT_ARG_NONE, &dnp, 0, "Include DNP"},
          {"origin-x", 'x', POPT_ARG_DOUBLE, &originx, 0, "Origin X", "mm"},
          {"origin-y", 'y', POPT_ARG_DOUBLE, &originy, 0, "Origin Y", "mm"},
