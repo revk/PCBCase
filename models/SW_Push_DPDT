@@ -8,9 +8,9 @@ if(part)
 }
 if(hole)
 {
- b(0,0,0,6,6,height);
+ b(0,0,0,6,6,height+1);
 }
 if(block)
 {
- b(0,0,4,8,8,height);
+ b(0,0,0,8,8,height);
 }
