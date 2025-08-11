@@ -179,7 +179,7 @@ module bottom_cut()
 	difference()
 	{
 		 translate([-casebottom-50,-casewall-50,-height]) cube([pcbwidth+casewall*2+100,pcblength+casewall*2+100,height*2]);
-		 top_cut(-fit/2);
+		 top_cut(-fit);
 	}
 }
 
