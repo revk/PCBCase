@@ -48,7 +48,7 @@ module top_half(step=false,fit=0)
 				hull()
                         	{
                             		pcb_hulled(0.1,casewall/2+fit);
-                            		translate([0,0,lip-0.1])pcb_hulled(0.101,casewall/2+snap+fit);
+                            		translate([0,0,lip-0.1])pcb_hulled(0.101,casewall/2-snap+fit);
                         	}
 				for(a=[45,225])rotate(a)hull()
                 		{
@@ -61,7 +61,7 @@ module top_half(step=false,fit=0)
 				hull()
                         	{
                             		pcb_hulled(0.1,casewall/2-fit);
-                            		translate([0,0,lip-0.1])pcb_hulled(0.101,casewall/2-snap-fit);
+                            		translate([0,0,lip-0.1])pcb_hulled(0.101,casewall/2+snap-fit);
                         	}
 				for(a=[135,315])rotate(a)hull()
                 		{
