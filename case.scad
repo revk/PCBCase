@@ -35,7 +35,7 @@ module preview()
 	color("#00f8")parts_bottom(block=true);
 }
 
-module top_half(step=false)
+module top_half(step=false,fit=0)
 {
 	difference()
 	{
@@ -47,8 +47,8 @@ module top_half(step=false)
                 		pcb_hulled(lip,casewall);
 				hull()
                         	{
-                            		pcb_hulled(0.1,casewall/2);
-                            		translate([0,0,lip-0.1])pcb_hulled(0.101,casewall/2+fit);
+                            		pcb_hulled(0.1,casewall/2+fit);
+                            		translate([0,0,lip-0.1])pcb_hulled(0.101,casewall/2+snap+fit);
                         	}
 				for(a=[45,225])rotate(a)hull()
                 		{
@@ -60,8 +60,8 @@ module top_half(step=false)
             		{
 				hull()
                         	{
-                            		pcb_hulled(0.1,casewall/2);
-                            		translate([0,0,lip-0.1])pcb_hulled(0.101,casewall/2-fit);
+                            		pcb_hulled(0.1,casewall/2-fit);
+                            		translate([0,0,lip-0.1])pcb_hulled(0.101,casewall/2-snap-fit);
                         	}
 				for(a=[135,315])rotate(a)hull()
                 		{
@@ -139,11 +139,11 @@ module parts_space()
 	}
 }
 
-module top_cut()
+module top_cut(fit=0)
 {
 	difference()
 	{
-		top_half(true);
+		top_half(true,fit);
 		if(parts_top)difference()
 		{
 			minkowski()
@@ -179,7 +179,7 @@ module bottom_cut()
 	difference()
 	{
 		 translate([-casebottom-50,-casewall-50,-height]) cube([pcbwidth+casewall*2+100,pcblength+casewall*2+100,height*2]);
-		 top_cut();
+		 top_cut(-fit/2);
 	}
 }
 
@@ -212,7 +212,7 @@ module top_edge()
 	intersection()
 	{
 		case_wall();
-		top_cut();
+		top_cut(fit/2);
 	}
 }
 

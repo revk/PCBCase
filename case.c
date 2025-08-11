@@ -35,6 +35,7 @@ double casebottom = 5;
 double casetop = 5;
 double casewall = 3;
 double lip = 3;
+double snap = -0.1;
 double fit = -0.1;
 double edge = 2;
 double margin = 0.2;
@@ -110,6 +111,7 @@ write_scad (pcb_t * pcb)
    fprintf (f, "casetop=%lf;\n", casetop);
    fprintf (f, "casewall=%lf;\n", casewall);
    fprintf (f, "fit=%lf;\n", fit);
+   fprintf (f, "snap=%lf;\n", snap);
    fprintf (f, "edge=%lf;\n", edge);
    fprintf (f, "pcbthickness=%lf;\n", pcbthickness);
    fprintf (f, "nohull=%s;\n", nohull ? "true" : "false");
@@ -801,6 +803,7 @@ main (int argc, const char *argv[])
          {"wall", 'w', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &casewall, 0, "Case wall", "mm"},
          {"edge", 'e', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &edge, 0, "Case edge", "mm"},
          {"fit", 'f', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fit, 0, "Case fit", "mm"},
+         {"snap", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &snap, 0, "Case snap", "mm"},
          {"hull-cap", 3, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &hullcap, 0, "Hull cap", "mm"},
          {"hull-edge", 3, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &hulledge, 0, "Hull edge", "mm"},
          {"no-hull", 'h', POPT_ARG_NONE, &nohull, 0, "No hull on parts"},
