@@ -811,7 +811,7 @@ main (int argc, const char *argv[])
          {"lip", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &lip, 0, "lip offset", "mm"},
          {"pcb", 0, POPT_ARG_INT, &layerpcb, 0, "Use User.N as PCB border instead of Edge.Cuts", "N"},
          {"case", 0, POPT_ARG_INT, &layercase, 0, "Use User.N as case border instead of pcb", "N"},
-         {"pcb-thickness", 'T', POPT_ARG_DOUBLE, &pcbthickness, 0, "PCB thickness (default: auto)", "mm"},
+         {"pcb-thickness", 0, POPT_ARG_DOUBLE, &pcbthickness, 0, "PCB thickness (default: auto)", "mm"},
          {"model-dir", 'M', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &modeldir, 0, "Model directory", "dir"},
          {"spacing", 's', POPT_ARG_DOUBLE, &spacing, 0, "Spacing (default: auto)", "mm"},
          {"curve-delta", 'D', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &delta, 0, "Curve delta", "mm"},
