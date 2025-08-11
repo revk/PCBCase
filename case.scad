@@ -212,7 +212,7 @@ module top_edge()
 	intersection()
 	{
 		case_wall();
-		top_cut(fit/2);
+		top_cut();
 	}
 }
 
