@@ -247,7 +247,7 @@ module bottom_body()
 		intersection()
 		{
 			solid_case();
-			translate([0,0,-height])pcb_hulled(height);
+			translate([0,0,-height])pcb_hulled(height+pcbthickness);
 		}
 		if(parts_bottom)minkowski()
 		{
