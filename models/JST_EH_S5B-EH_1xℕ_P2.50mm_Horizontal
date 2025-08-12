@@ -2,10 +2,10 @@ if(part)
 {
 	b(2.5*(N/2)-1.25,3.6,0,2.5*N+2.5,6,4);
 	b(2.5*(N/2)-1.25,0,0,2.5*N+2.5,3.2,1.5);
-	for(a=[0:1:N-1])translate([2.5*a,0,-3.2])
-	{
-		cylinder(d1=0.64,d2=2,h=3.2-pcbthickness,$fn=12);
-		translate([0,0,3.2-pcbthickness])cylinder(d=2,h=pcbthickness);
+	for(a=[0:1:N-1])translate([2.5*a,0,-3.2])hull()
+	{ // messy but F5 was not showing at all
+		cylinder(d=0.64,h=0.1,$fn=12);
+		translate([0,0,3.2-pcbthickness])cylinder(d=2,h=pcbthicknless,$fn=12);
 	}
 }
 if(hole)
