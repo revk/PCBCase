@@ -88,9 +88,11 @@ write_scad (pcb_t * pcb, int tb)
       f = fopen (filename, "w");
    if (!f)
       err (1, "Cannot open scad %s", filename);
-   free(filename);
+   free (filename);
 
-   char *cwd = get_current_dir_name ();
+   char cwd[1024];
+   if (!getcwd (cwd, sizeof (cwd)))
+      err (1, "Cannot get CWD");
    if (chdir (modeldir))
       errx (1, "Cannot access model dir %s", modeldir);
 
@@ -809,7 +811,6 @@ write_scad (pcb_t * pcb, int tb)
       fclose (f);
    if (chdir (cwd))
       errx (1, "Cannot access dir %s", cwd);
-   free(cwd);
 }
 
 int
