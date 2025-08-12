@@ -35,8 +35,9 @@ double casebottom = 5;
 double casetop = 5;
 double casewall = 3;
 double lip = 3;
+int lipa=0;
 double snap = 0.1;
-double fit = 0.1;
+double fit = 0;
 double edge = 2;
 double margin = 0.2;
 double spacing = 0;
@@ -107,6 +108,7 @@ write_scad (pcb_t * pcb)
    fprintf (f, "// Globals\n");
    fprintf (f, "margin=%lf;\n", margin);
    fprintf (f, "lip=%lf;\n", lip);
+   fprintf (f, "lipa=%d;\n", lipa);
    fprintf (f, "casebottom=%lf;\n", casebottom);
    fprintf (f, "casetop=%lf;\n", casetop);
    fprintf (f, "casewall=%lf;\n", casewall);
@@ -809,6 +811,7 @@ main (int argc, const char *argv[])
          {"no-hull", 'h', POPT_ARG_NONE, &nohull, 0, "No hull on parts"},
          {"margin", 'm', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &margin, 0, "margin", "mm"},
          {"lip", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &lip, 0, "lip offset", "mm"},
+         {"lipa", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &lipa, 0, "lip cut angle", "mm"},
          {"pcb", 0, POPT_ARG_INT, &layerpcb, 0, "Use User.N as PCB border instead of Edge.Cuts", "N"},
          {"case", 0, POPT_ARG_INT, &layercase, 0, "Use User.N as case border instead of pcb", "N"},
          {"pcb-thickness", 0, POPT_ARG_DOUBLE, &pcbthickness, 0, "PCB thickness (default: auto)", "mm"},
