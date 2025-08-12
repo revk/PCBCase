@@ -29,13 +29,15 @@ int nohull = 0;
 const char *pcbfile = NULL;
 char *scadfile = NULL;
 const char *modeldir = "PCBCase/models";
+const char *casefile = NULL;
 const char *ignore = NULL;
 double pcbthickness = 0;
 double casebottom = 5;
 double casetop = 5;
 double casewall = 3;
 double lip = 3;
-int lipa=0;
+int lipa = 0;
+int lipt = 0;
 double snap = 0.1;
 double fit = 0;
 double edge = 2;
@@ -109,6 +111,7 @@ write_scad (pcb_t * pcb)
    fprintf (f, "margin=%lf;\n", margin);
    fprintf (f, "lip=%lf;\n", lip);
    fprintf (f, "lipa=%d;\n", lipa);
+   fprintf (f, "lipt=%d;\n", lipt);
    fprintf (f, "casebottom=%lf;\n", casebottom);
    fprintf (f, "casetop=%lf;\n", casetop);
    fprintf (f, "casewall=%lf;\n", casewall);
@@ -776,7 +779,10 @@ write_scad (pcb_t * pcb)
    }
 
    /* Final SCAD */
-   copy_file (f, "../case.scad");
+   if (casefile)
+      fprintf (f, "include <%s>\n", casefile);
+   else
+      copy_file (f, "../case.scad");
 
    if (debug)
       fprintf (f, "translate([spacing*2,0,0])preview();\n");
@@ -799,6 +805,7 @@ main (int argc, const char *argv[])
       const struct poptOption optionsTable[] = {
          {"pcb-file", 'i', POPT_ARG_STRING, &pcbfile, 0, "PCB file", "filename"},
          {"scad-file", 'o', POPT_ARG_STRING, &scadfile, 0, "Openscad file", "filename"},
+         {"case-file", 0, POPT_ARG_STRING, &casefile, 0, "case.scad file to include", "filename"},
          {"ignore", 'I', POPT_ARG_STRING, &ignore, 0, "Ignore", "ref{,ref}"},
          {"bottom", 'b', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &casebottom, 0, "Case bottom", "mm"},
          {"top", 't', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &casetop, 0, "Case top", "mm"},
@@ -811,7 +818,8 @@ main (int argc, const char *argv[])
          {"no-hull", 'h', POPT_ARG_NONE, &nohull, 0, "No hull on parts"},
          {"margin", 'm', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &margin, 0, "margin", "mm"},
          {"lip", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &lip, 0, "lip offset", "mm"},
-         {"lipa", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &lipa, 0, "lip cut angle", "mm"},
+         {"lip-angle", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &lipa, 0, "lip cut angle", "deg"},
+         {"lip-type", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &lipa, 0, "lip cut type", "N"},
          {"pcb", 0, POPT_ARG_INT, &layerpcb, 0, "Use User.N as PCB border instead of Edge.Cuts", "N"},
          {"case", 0, POPT_ARG_INT, &layercase, 0, "Use User.N as case border instead of pcb", "N"},
          {"pcb-thickness", 0, POPT_ARG_DOUBLE, &pcbthickness, 0, "PCB thickness (default: auto)", "mm"},
