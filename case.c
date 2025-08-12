@@ -74,7 +74,7 @@ write_scad (pcb_t * pcb, int tb)
     *o2,
     *o3;
    /* making scad file */
-   char *filename = strdupa (scadfile);
+   char *filename = strdup (scadfile);
    if (twofile && tb)
    {
       char *c = strrchr (filename, '.');
@@ -88,6 +88,7 @@ write_scad (pcb_t * pcb, int tb)
       f = fopen (filename, "w");
    if (!f)
       err (1, "Cannot open scad %s", filename);
+   free(filename);
 
    char *cwd = get_current_dir_name ();
    if (chdir (modeldir))
@@ -808,6 +809,7 @@ write_scad (pcb_t * pcb, int tb)
       fclose (f);
    if (chdir (cwd))
       errx (1, "Cannot access dir %s", cwd);
+   free(cwd);
 }
 
 int
