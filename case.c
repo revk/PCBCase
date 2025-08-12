@@ -37,7 +37,7 @@ double casetop = 5;
 double casewall = 3;
 double lip = 3;
 int lipa = 0;
-int lipt = 0;
+int lipt = 2;
 double snap = 0.1;
 double fit = 0;
 double edge = 2;
@@ -819,7 +819,7 @@ main (int argc, const char *argv[])
          {"margin", 'm', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &margin, 0, "margin", "mm"},
          {"lip", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &lip, 0, "lip offset", "mm"},
          {"lip-angle", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &lipa, 0, "lip cut angle", "deg"},
-         {"lip-type", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &lipa, 0, "lip cut type", "N"},
+         {"lip-type", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &lipt, 0, "lip cut type", "0..2"},
          {"pcb", 0, POPT_ARG_INT, &layerpcb, 0, "Use User.N as PCB border instead of Edge.Cuts", "N"},
          {"case", 0, POPT_ARG_INT, &layercase, 0, "Use User.N as case border instead of pcb", "N"},
          {"pcb-thickness", 0, POPT_ARG_DOUBLE, &pcbthickness, 0, "PCB thickness (default: auto)", "mm"},

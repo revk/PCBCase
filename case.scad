@@ -42,15 +42,33 @@ module top_half(step=false,fit=0)
 		translate([-casebottom-100,-casewall-100,pcbthickness+0.01]) cube([pcbwidth+casewall*2+200,pcblength+casewall*2+200,height]);
 		if(step)translate([0,0,pcbthickness])
         	{
+			snaph=(lip-snap*2)/6;
             		difference()
             		{
                 		pcb_hulled(lip,casewall);
-				hull()
+				if(snap)
                         	{
-                            		pcb_hulled(0.1,casewall/2+fit);
-                            		translate([0,0,lip-0.1])pcb_hulled(0.101,casewall/2-snap+fit);
+					hull()
+					{
+						pcb_hulled(0.1,casewall/2-snap/2+fit);
+						translate([0,0,snap])pcb_hulled(snaph,casewall/2+snap/2+fit);
+						translate([0,0,lip-snap-snaph])pcb_hulled(0.1,casewall/2-snap/2+fit);
+					}
+					translate([0,0,lip-snap-snaph])pcb_hulled(snaph,casewall/2-snap/2+fit);
+					hull()
+					{
+						translate([0,0,lip-snap])pcb_hulled(0.1,casewall/2-snap/2+fit);
+						translate([0,0,lip])pcb_hulled(0.1,casewall/2+snap/2+fit);
+					}
                         	}
-				for(a=[0,180])rotate(a+lipa)hull()
+				else pcb_hulled(lip,casewall/2+fit);
+				if(lipt==0)translate([-pcbwidth,-pcblength,0])cube([pcbwidth*2,pcblength*2,lip]);
+				else if(lipt==1) rotate(lipa)translate([0,-pcblength,0])hull()
+				{
+					translate([lip/2,0,0])cube([pcbwidth,pcblength*2,lip]);
+					translate([-lip/2,0,lip])cube([pcbwidth,pcblength*2,lip]);
+				}
+				else if(lipt==2)for(a=[0,180])rotate(a+lipa)hull()
                 		{
                             		translate([lip/2,lip/2,0])cube([pcbwidth+pcblength,pcbwidth+pcblength,lip]);
                             		translate([-lip/2,-lip/2,lip])cube([pcbwidth+pcblength,pcbwidth+pcblength,lip]);
@@ -58,12 +76,28 @@ module top_half(step=false,fit=0)
             		}
             		difference()
             		{
-				hull()
+				if(snap)
                         	{
-                            		pcb_hulled(0.1,casewall/2-fit);
-                            		translate([0,0,lip-0.1])pcb_hulled(0.101,casewall/2+snap-fit);
+					hull()
+					{
+						translate([0,0,-0.1])pcb_hulled(0.1,casewall/2+snap/2-fit);
+						translate([0,0,snap-0.1])pcb_hulled(0.1,casewall/2-snap/2-fit);
+					}
+					translate([0,0,snap])pcb_hulled(snaph,casewall/2-snap/2-fit);
+					hull()
+					{
+						translate([0,0,snap+snaph])pcb_hulled(0.1,casewall/2-snap/2-fit);
+						translate([0,0,lip-snap-snaph])pcb_hulled(snaph,casewall/2+snap/2-fit);
+						translate([0,0,lip-0.1])pcb_hulled(0.1,casewall/2-snap/2-fit);
+					}
                         	}
-				for(a=[90,270])rotate(a+lipa)hull()
+				else pcb_hulled(lip,casewall/2-fit);
+				if(lipt==1)rotate(lipa+180)translate([0,-pcblength,0])hull()
+				{
+					translate([lip/2,0,0])cube([pcbwidth,pcblength*2,lip+0.1]);
+					translate([-lip/2,0,lip])cube([pcbwidth,pcblength*2,lip+0.1]);
+				}
+				else if(lipt==2)for(a=[90,270])rotate(a+lipa)hull()
                 		{
                             		translate([lip/2,lip/2,0])cube([pcbwidth+pcblength,pcbwidth+pcblength,lip]);
                             		translate([-lip/2,-lip/2,lip])cube([pcbwidth+pcblength,pcbwidth+pcblength,lip]);
@@ -197,7 +231,7 @@ module top_body()
 		{
 			if(nohull)parts_top(part=true);
 			else hull(){parts_top(part=true);pcb_hulled();}
-			translate([0,0,margin-height])cylinder(r=margin,h=height,$fn=8);
+			translate([0,0,margin-height])cylinder(r=margin*2,h=height,$fn=8);
 		}
 	}
 	intersection()
@@ -253,7 +287,7 @@ module bottom_body()
 		{
 			if(nohull)parts_bottom(part=true);
 			else hull()parts_bottom(part=true);
-			translate([0,0,-margin])cylinder(r=margin,h=height,$fn=8);
+			translate([0,0,-margin])cylinder(r=margin*2,h=height,$fn=8);
 		}
 	}
 	intersection()
