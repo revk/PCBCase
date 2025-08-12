@@ -23,6 +23,7 @@ int dnp = 0;
 int norender = 0;
 int toponly = 0;
 int bottomonly = 0;
+int twofile = 0;
 int layerpcb = 0;
 int layercase = 0;
 int nohull = 0;
@@ -67,18 +68,28 @@ copy_file (FILE * o, const char *fn)
 }
 
 void
-write_scad (pcb_t * pcb)
+write_scad (pcb_t * pcb, int tb)
 {
    pcb_t *o,
     *o2,
     *o3;
    /* making scad file */
+   char *filename = strdupa (scadfile);
+   if (twofile && tb)
+   {
+      char *c = strrchr (filename, '.');
+      if (c && c > filename && c[-1] == 'T')
+         c[-1] = 'B';
+      else
+         errx (1, "Filename must end T.scad for --two-file");
+   }
    FILE *f = stdout;
-   if (strcmp (scadfile, "-"))
-      f = fopen (scadfile, "w");
+   if (strcmp (filename, "-"))
+      f = fopen (filename, "w");
    if (!f)
-      err (1, "Cannot open scad %s", scadfile);
+      err (1, "Cannot open scad %s", filename);
 
+   char *cwd = get_current_dir_name ();
    if (chdir (modeldir))
       errx (1, "Cannot access model dir %s", modeldir);
 
@@ -786,15 +797,17 @@ write_scad (pcb_t * pcb)
 
    if (debug)
       fprintf (f, "translate([spacing*2,0,0])preview();\n");
-   if (toponly)
+   if (toponly || (twofile && !tb))
       fprintf (f, "top();\n");
-   else if (bottomonly)
+   else if (bottomonly || (twofile && tb))
       fprintf (f, "bottom();\n");
    else if (!norender)
       fprintf (f, "bottom(); translate([spacing,0,0])top();\n");
 
    if (f != stdout)
       fclose (f);
+   if (chdir (cwd))
+      errx (1, "Cannot access dir %s", cwd);
 }
 
 int
@@ -829,6 +842,7 @@ main (int argc, const char *argv[])
          {"no-render", 'n', POPT_ARG_NONE, &norender, 0, "No-render, just define base() and top()"},
          {"bottom-only", 'B', POPT_ARG_NONE, &bottomonly, 0, "Botton only"},
          {"top-only", 'T', POPT_ARG_NONE, &toponly, 0, "Top only"},
+         {"two-file", 3, POPT_ARG_NONE, &twofile, 0, "Dual file, replace T.scad with B.scad"},
          {"dnp", 0, POPT_ARG_NONE, &dnp, 0, "Include DNP"},
          {"origin-x", 'x', POPT_ARG_DOUBLE, &originx, 0, "Origin X", "mm"},
          {"origin-y", 'y', POPT_ARG_DOUBLE, &originy, 0, "Origin Y", "mm"},
@@ -868,7 +882,9 @@ main (int argc, const char *argv[])
    pcb_t *pcb = pcb_load (pcbfile);
    if (strcmp (pcb->tag, "kicad_pcb"))
       errx (1, "Not a kicad_pcb (%s)", pcb->tag);
-   write_scad (pcb);
+   write_scad (pcb, 0);
+   if (twofile)
+      write_scad (pcb, 1);
    pcb = pcb_free (pcb);
 
    poptFreeContext (optCon);
