@@ -472,10 +472,7 @@ write_scad (pcb_t * pcb, int tb)
       if (n < modulen)
          return n;
       if (access (fn, R_OK))
-      {
-	      warnx("Not %s",fn);
          return -1;
-      }
       modules = realloc (modules, (++modulen) * sizeof (*modules));
       if (!modules)
          errx (1, "malloc");
