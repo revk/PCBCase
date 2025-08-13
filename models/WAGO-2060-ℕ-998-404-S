@@ -9,7 +9,7 @@ if(part)
 	}
 	for(p=[0:n-1])hull()
 	{
-        	translate([-6,-4*(n-1)/2+p*4,2])sphere(d=4,$fn=12);
-        	translate([-50,-4*(n-1)/2+p*4,2])sphere(d=4,$fn=12);
+        	translate([-6,-4*(n-1)/2+p*4,2])sphere(d=3,$fn=24);
+        	translate([-50,-4*(n-1)/2+p*4,2])sphere(d=3,$fn=24);
 	}
 }
