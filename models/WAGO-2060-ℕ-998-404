@@ -1,5 +1,5 @@
 // WAGO-2060-45x-998-404
-N=1;
+n=N%10; // 45x
 if(part)
 {
 	translate([-0.9,0,0])hull()
