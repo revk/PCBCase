@@ -20,7 +20,7 @@ if(block)
 {
 	hull()
 	{
-		translate([0,0,2.1])cylinder(d=9,h=1,$fn=8);
+		translate([0,0,2.1])cylinder(d=10,h=1,$fn=8);
 		translate([0,0,height])cylinder(d=15,h=1,$fn=8);
 	}
 }
