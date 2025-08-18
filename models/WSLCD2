@@ -18,8 +18,8 @@ translate([-29,17.5,8.25]) rotate([180,0,0])
         // Pins
         for(x=[0:1:7])translate([2.4,8.61+x*2.54,0])
         {
-        	translate([0,0,7.5])cylinder(d1=1.5,d2=0.254,h=1.5,$fn=24);
-        	translate([0,0,-2])cylinder(d2=1.5,d1=0.254,h=1,$fn=24);
+        	translate([0,0,7.5])cylinder(d1=1.5,d2=0.4,h=1.5,$fn=24);
+        	translate([0,0,-2.5])cylinder(d2=1.5,d1=0.4,h=2.5-pcbthickness,$fn=24);
         }
         // Screws / Pillars
         for(x=[2.5,55.5])for(y=[2.5,32.5])translate([x,y,0])
