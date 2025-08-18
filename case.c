@@ -473,7 +473,7 @@ write_scad (pcb_t * pcb, int tb)
          return n;
       if (access (fn, R_OK))
          return -1;
-      odules = realloc (modules, (++modulen) * sizeof (*modules));
+      modules = realloc (modules, (++modulen) * sizeof (*modules));
       if (!modules)
          errx (1, "malloc");
       memset (modules + n, 0, sizeof (*modules));
