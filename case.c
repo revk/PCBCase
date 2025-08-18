@@ -39,7 +39,7 @@ double casewall = 3;
 double lip = 3;
 int lipa = 0;
 int lipt = 2;
-double snap = 0.1;
+double snap = 0.15;
 double fit = 0;
 double edge = 2;
 double margin = 0.2;
@@ -473,7 +473,7 @@ write_scad (pcb_t * pcb, int tb)
          return n;
       if (access (fn, R_OK))
          return -1;
-      modules = realloc (modules, (++modulen) * sizeof (*modules));
+      odules = realloc (modules, (++modulen) * sizeof (*modules));
       if (!modules)
          errx (1, "malloc");
       memset (modules + n, 0, sizeof (*modules));
