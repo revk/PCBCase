@@ -53,6 +53,7 @@ double datex = 0;               // Date code
 double datey = 0;
 double dateh = 2;
 double datet = 0.25;
+char *datef = "OCRB";
 char *date = NULL;
 
 void
@@ -821,8 +822,8 @@ write_scad (pcb_t * pcb, int tb)
       fprintf (f, "bottom();");
       if (date && *date && datet > 0 && dateh > 0)
          fprintf (f,
-                  "translate([%f,%f,0])scale([-1,1])linear_extrude(%f)text(\"%s\",size=%f,halign=\"center\",valign=\"center\",font=\"OCR-B\");}",
-                  datex, datey, datet, date, dateh);
+                  "translate([%f,%f,0])scale([-1,1])linear_extrude(%f)text(\"%s\",size=%f,halign=\"center\",valign=\"center\",font=\"%s\");}",
+                  datex, datey, datet, date, dateh, datef);
    }
    if (debug)
       fprintf (f, "translate([spacing*2,0,0])preview();\n");
@@ -880,8 +881,9 @@ main (int argc, const char *argv[])
          {"origin-y", 'y', POPT_ARG_DOUBLE, &originy, 0, "Origin Y", "mm"},
          {"date-x", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &datex, 0, "Date X pos", "mm"},
          {"date-y", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &datey, 0, "Date Y pos", "mm"},
-         {"date-h", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dateh, 0, "Date text height", "mm"},
-         {"date-t", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &datet, 0, "Date text thickness", "mm"},
+         {"date-height", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dateh, 0, "Date text height", "mm"},
+         {"date-thickness", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &datet, 0, "Date text thickness", "mm"},
+         {"date-font", 0, POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &datef, 0, "Date text font", "font"},
          {"date", 0, POPT_ARG_STRING, &date, 0, "Date text (default is from file)", "text"},
          {"debug", 'v', POPT_ARG_NONE, &debug, 0, "Debug"},
          POPT_AUTOHELP {}
