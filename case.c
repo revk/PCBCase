@@ -816,11 +816,13 @@ write_scad (pcb_t * pcb, int tb)
 
    void addbottom (void)
    {
-	   if(date&&datet>0&&dateh>0)
-		   fprintf(f,"difference(){");
+      if (date && *date && datet > 0 && dateh > 0)
+         fprintf (f, "difference(){");
       fprintf (f, "bottom();");
-	   if(date&&datet>0&&dateh>0)
-		   fprintf(f,"translate([%f,%f,0])linear_extrude(%f)text(\"%s\",size=%f,halign=\"center\",valign=\"center\",font=\"OCR-B\");}",datex,datey,datet,date,dateh);
+      if (date && *date && datet > 0 && dateh > 0)
+         fprintf (f,
+                  "translate([%f,%f,0])linear_extrude(%f)text(\"%s\",size=%f,halign=\"center\",valign=\"center\",font=\"OCR-B\");}",
+                  datex, datey, datet, date, dateh);
    }
    if (debug)
       fprintf (f, "translate([spacing*2,0,0])preview();\n");
