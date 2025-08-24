@@ -49,6 +49,11 @@ double hullcap = 1;
 double hulledge = 1;
 double originx = NAN;
 double originy = NAN;
+double datex = 0;               // Date code
+double datey = 0;
+double dateh = 2;
+double datet = 0.25;
+char *date = NULL;
 
 void
 copy_file (FILE * o, const char *fn)
@@ -85,7 +90,18 @@ write_scad (pcb_t * pcb, int tb)
    }
    FILE *f = stdout;
    if (strcmp (filename, "-"))
+   {
+      if (!date && dateh > 0 && datet > 0)
+      {
+         struct stat s;
+         if (stat (filename, &s))
+            err (1, "Cannot stat %s", filename);
+         struct tm t;
+         localtime_r (&s.st_mtime, &t);
+         asprintf (&date, "%04d-%02d-%02d", t.tm_year + 1900, t.tm_mon, t.tm_mday);
+      }
       f = fopen (filename, "w");
+   }
    if (!f)
       err (1, "Cannot open scad %s", filename);
    free (filename);
@@ -798,14 +814,25 @@ write_scad (pcb_t * pcb, int tb)
    else
       copy_file (f, "../case.scad");
 
+   void addbottom (void)
+   {
+	   if(date&&datet>0&&dateh>0)
+		   fprintf(f,"difference(){");
+      fprintf (f, "bottom();");
+	   if(date&&datet>0&&dateh>0)
+		   fprintf(f,"translate([%f,%f,0])linear_extrude(%f)text(\"%s\",size=%f,halign=\"center\",valign=\"center\",font=\"OCR-B\");}",datex,datey,datet,date,dateh);
+   }
    if (debug)
       fprintf (f, "translate([spacing*2,0,0])preview();\n");
    if (toponly || (twofile && !tb))
       fprintf (f, "top();\n");
    else if (bottomonly || (twofile && tb))
-      fprintf (f, "bottom();\n");
+      addbottom ();
    else if (!norender)
-      fprintf (f, "bottom(); translate([spacing,0,0])top();\n");
+   {
+      addbottom ();
+      fprintf (f, "translate([spacing,0,0])top();\n");
+   }
 
    if (f != stdout)
       fclose (f);
@@ -849,6 +876,11 @@ main (int argc, const char *argv[])
          {"dnp", 0, POPT_ARG_NONE, &dnp, 0, "Include DNP"},
          {"origin-x", 'x', POPT_ARG_DOUBLE, &originx, 0, "Origin X", "mm"},
          {"origin-y", 'y', POPT_ARG_DOUBLE, &originy, 0, "Origin Y", "mm"},
+         {"date-x", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &datex, 0, "Date X pos", "mm"},
+         {"date-y", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &datey, 0, "Date Y pos", "mm"},
+         {"date-h", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dateh, 0, "Date text height", "mm"},
+         {"date-t", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &datet, 0, "Date text thickness", "mm"},
+         {"date", 0, POPT_ARG_STRING, &date, 0, "Date text (default is from file)", "text"},
          {"debug", 'v', POPT_ARG_NONE, &debug, 0, "Debug"},
          POPT_AUTOHELP {}
       };
