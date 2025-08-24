@@ -91,18 +91,7 @@ write_scad (pcb_t * pcb, int tb)
    }
    FILE *f = stdout;
    if (strcmp (filename, "-"))
-   {
-      if (!date && dateh > 0 && datet > 0)
-      {
-         struct stat s;
-         if (stat (filename, &s))
-            err (1, "Cannot stat %s", filename);
-         struct tm t;
-         localtime_r (&s.st_mtime, &t);
-         asprintf (&date, "%04d-%02d-%02d", t.tm_year + 1900, t.tm_mon, t.tm_mday);
-      }
       f = fopen (filename, "w");
-   }
    if (!f)
       err (1, "Cannot open scad %s", filename);
    free (filename);
@@ -917,6 +906,15 @@ main (int argc, const char *argv[])
          e = f + strlen (f);
       if (asprintf (&scadfile, "%.*s.scad", (int) (e - pcbfile), pcbfile) < 0)
          errx (1, "malloc");
+   }
+   if (!date && dateh > 0 && datet > 0)
+   {
+      struct stat s;
+      if (stat (pcbfile, &s))
+         err (1, "Cannot stat %s", pcbfile);
+      struct tm t;
+      localtime_r (&s.st_mtime, &t);
+      asprintf (&date, "%04d-%02d-%02d", t.tm_year + 1900, t.tm_mon, t.tm_mday);
    }
    pcb_t *pcb = pcb_load (pcbfile);
    if (strcmp (pcb->tag, "kicad_pcb"))
