@@ -821,7 +821,7 @@ write_scad (pcb_t * pcb, int tb)
       fprintf (f, "bottom();");
       if (date && *date && datet > 0 && dateh > 0)
          fprintf (f,
-                  "translate([%f,%f,0])linear_extrude(%f)text(\"%s\",size=%f,halign=\"center\",valign=\"center\",font=\"OCR-B\");}",
+                  "translate([%f,%f,0])scale([-1,1])linear_extrude(%f)text(\"%s\",size=%f,halign=\"center\",valign=\"center\",font=\"OCR-B\");}",
                   datex, datey, datet, date, dateh);
    }
    if (debug)
