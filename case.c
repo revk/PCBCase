@@ -914,7 +914,7 @@ main (int argc, const char *argv[])
          err (1, "Cannot stat %s", pcbfile);
       struct tm t;
       localtime_r (&s.st_mtime, &t);
-      asprintf (&date, "%04d-%02d-%02d", t.tm_year + 1900, t.tm_mona + 1, t.tm_mday);
+      asprintf (&date, "%04d-%02d-%02d", t.tm_year + 1900, t.tm_mon + 1, t.tm_mday);
    }
    pcb_t *pcb = pcb_load (pcbfile);
    if (strcmp (pcb->tag, "kicad_pcb"))
