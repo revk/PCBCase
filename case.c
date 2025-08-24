@@ -51,8 +51,8 @@ double originx = NAN;
 double originy = NAN;
 double datex = 0;               // Date code
 double datey = 0;
-double dateh = 2;
-double datet = 0.25;
+double dateh = 3;
+double datet = 0.5;
 char *datef = "OCRB";
 char *date = NULL;
 
