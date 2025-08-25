@@ -1,0 +1,76 @@
+#!/bin/csh -f
+
+set nonomatch
+
+setenv D "$1:h"
+cd "$D"
+setenv RM "$1:t"
+
+setenv TMP `mktemp -u`.md
+cat << END > "$TMP"
+# $D
+
+These files are for use in [KiCad](https://www.kicad.org).
+
+## Trademark
+
+This is an open source project, but bear in mind you cannot sell boards bearing the Andrews & Arnold Ltd name, the A&A logo, the registered trademark AJK logo, or the GS1 allocated EANs assigned to Andrews & Arnold Ltd.
+
+END
+set stl=(*.stl)
+if("$stl" != '*.stl') then
+	echo "## 3D" >> "$TMP"
+	echo "" >> "$TMP"
+	echo "3D case designs are normally automatically created from the PCB so as to ensure correct details and placement of apertures, etc." >> "$TMP"
+	echo "" >> "$TMP"
+	set c=0;
+	foreach s ($stl)
+		setenv N `echo "$s" | sed 's/[BT].stl$//'`
+		if("$N" != "$s" && "$s" != "${N}T.stl" && -e "${N}B.stl" && -e "${N}T.stl") then
+			@ c = $c + 1
+			if($c == 1) then
+				echo "|Design|Bottom|Top|" >> "$TMP"
+				echo "|------|------|---|" >> "$TMP"
+			endif
+			echo "|$N|[${N}B](${N}B.stl)|[${N}T](${N}T.stl)|" >> "$TMP"
+		endif
+	end
+	if($c) then
+		echo "" >> "$TMP"
+	endif
+	set c=0
+	foreach s ($stl)
+		setenv N `echo "$s" | sed 's/[BT].stl$//'`
+		if("$N" == "$s" || ! -e "${N}B.stl" || ! -e "${N}T.stl") then
+			@ c = $c + 1
+			echo "- [$s:r]($s)" >> "$TMP"
+		endif
+	end
+	if($c) then
+		echo "" >> "$TMP"
+	endif
+endif
+
+set pcb=(*.kicad_pcb)
+if("$pcb" != '*.kicad_pcb') then
+	foreach p ($pcb)
+		setenv BOARD "$p:r"
+		echo "## Images" >> "$TMP"
+		echo "" >> "$TMP"
+		echo -n "<img src='$BOARD.png' width=32%>" >> "$TMP"
+		echo -n "<img src='$BOARD-90.png' width=32%>" >> "$TMP"
+		echo "<img src='$BOARD-bottom.png' width=32%>" >> "$TMP"
+		if(-e "$BOARD-alt.png") then
+			echo -n "<img src='$BOARD-alt.png' width=32%>" >> "$TMP"
+			echo -n "<img src='$BOARD-alt-90.png' width=32%>" >> "$TMP"
+			echo "<img src='$BOARD-alt-bottom.png' width=32%>" >> "$TMP"
+			endif
+		if(-e "$BOARD-panel.png") then
+			echo -n "<img src='$BOARD-panel.png' width=49%>" >> "$TMP"
+			echo "<img src='$BOARD-panel-bottom.png' width=49%>" >> "$TMP"
+		endif
+	end
+endif
+echo "" >> "$TMP"
+echo "*Auto generated `date +%FT%T`*" >> "$TMP"
+mv -f "$TMP" "$RM"
