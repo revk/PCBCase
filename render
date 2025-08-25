@@ -76,9 +76,9 @@ These files are for use in [KiCad](https://www.kicad.org).
 
 This is an open source project, but bear in mind you cannot sell boards bearing the Andrews & Arnold Ltd name, the A&A logo, the registered trademark AJK logo, or the GS1 allocated EANs assigned to Andrews & Arnold Ltd.
 
-## Images
-
 END
+	echo "## Images" >> "$TMP"
+	echo "" >> "$TMP"
 	echo -n "<img src='$BOARD.png' width=32%>" >> "$TMP"
 	echo -n "<img src='$BOARD-90.png' width=32%>" >> "$TMP"
 	echo "<img src='$BOARD-bottom.png' width=32%>" >> "$TMP"
