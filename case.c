@@ -53,7 +53,7 @@ double datex = 0;               // Date code
 double datey = 0;
 double dateh = 3;
 double datet = 0.5;
-int datea=0;
+int datea = 0;
 char *datef = "OCRB";
 char *date = NULL;
 
@@ -144,6 +144,16 @@ write_scad (pcb_t * pcb, int tb)
    fprintf (f, "hullcap=%lf;\n", hullcap);
    fprintf (f, "hulledge=%lf;\n", hulledge);
    fprintf (f, "useredge=%s;\n", layercase ? "true" : "false");
+   if (date && *date && dateh > 0 && datet > 0)
+   {
+      fprintf (f, "datex=%lf;\n", datex);
+      fprintf (f, "datey=%lf;\n", datey);
+      fprintf (f, "datet=%lf;\n", datet);
+      fprintf (f, "dateh=%lf;\n", dateh);
+      fprintf (f, "datea=%d;\n", datea);
+      fprintf (f, "date=\"%s\";\n", date);
+      fprintf (f, "datef=\"%s\";\n", datef);
+   }
 
    double lx = DBL_MAX,
       hx = -DBL_MAX,
@@ -811,9 +821,7 @@ write_scad (pcb_t * pcb, int tb)
          fprintf (f, "difference(){");
       fprintf (f, "bottom();");
       if (date && *date && datet > 0 && dateh > 0)
-         fprintf (f,
-                  "translate([%f,%f,-0.001])rotate(%d)scale([-1,1])linear_extrude(%f)text(\"%s\",size=%f,halign=\"center\",valign=\"center\",font=\"%s\");}",
-                  datex, datey, datea,datet, date, dateh, datef);
+         fprintf (f,"datecode();}");
    }
    if (debug)
       fprintf (f, "translate([spacing*2,0,0])preview();\n");
