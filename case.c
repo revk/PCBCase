@@ -803,7 +803,7 @@ write_scad (pcb_t * pcb, int tb)
    if (casefile)
       fprintf (f, "include <%s>\n", casefile);
    else
-      copy_file (f, "../case.scad");
+      copy_file (f, "../case-scad");
 
    void addbottom (void)
    {
@@ -841,7 +841,7 @@ main (int argc, const char *argv[])
       const struct poptOption optionsTable[] = {
          {"pcb-file", 'i', POPT_ARG_STRING, &pcbfile, 0, "PCB file", "filename"},
          {"scad-file", 'o', POPT_ARG_STRING, &scadfile, 0, "Openscad file", "filename"},
-         {"case-file", 0, POPT_ARG_STRING, &casefile, 0, "case.scad file to include", "filename"},
+         {"case-file", 0, POPT_ARG_STRING, &casefile, 0, "case-scad file to include", "filename"},
          {"ignore", 'I', POPT_ARG_STRING, &ignore, 0, "Ignore", "ref{,ref}"},
          {"bottom", 'b', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &casebottom, 0, "Case bottom", "mm"},
          {"top", 't', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &casetop, 0, "Case top", "mm"},
