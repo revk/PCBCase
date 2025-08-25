@@ -6,11 +6,18 @@ setenv D "$1:h"
 cd "$D"
 setenv RM "$1:t"
 
+if(-e "$RM") then
+	grep -q "Auto generated " "$RM"
+	if($status) then
+		# Non auto file exists
+		touch "$RM"
+		exit 0
+	endif
+endif
+
 setenv TMP `mktemp -u`.md
 cat << END > "$TMP"
 # $D
-
-These files are for use in [KiCad](https://www.kicad.org).
 
 ## Trademark
 
@@ -18,6 +25,19 @@ This is an open source project, but bear in mind you cannot sell boards bearing 
 
 END
 set stl=(*.stl)
+set pcb=(*.kicad_pcb)
+
+if("$pcb" != '*.kicad_pcb') then
+	echo "## PCB Designs" >> "$TMP"
+	echo "" >> "$TMP"
+	echo "These files are for use with [KiCAD](https://www.kicad.org)." >> "$TMP"
+	echo "" >> "$TMP"
+	foreach p ($pcb)
+		echo "- [$p:r]($p:r.kicad_pro)" >> "$TMP"
+	endif
+endif
+
+
 if("$stl" != '*.stl') then
 	echo "## 3D" >> "$TMP"
 	echo "" >> "$TMP"
@@ -51,7 +71,6 @@ if("$stl" != '*.stl') then
 	endif
 endif
 
-set pcb=(*.kicad_pcb)
 if("$pcb" != '*.kicad_pcb') then
 	foreach p ($pcb)
 		setenv BOARD "$p:r"
@@ -72,5 +91,7 @@ if("$pcb" != '*.kicad_pcb') then
 	end
 endif
 echo "" >> "$TMP"
-echo "*Auto generated `date +%FT%T`*" >> "$TMP"
+echo "---" >> "$TMP"
+echo "" >> "$TMP"
+echo "*Auto generated $RM `date +%FT%T`*" >> "$TMP"
 mv -f "$TMP" "$RM"
