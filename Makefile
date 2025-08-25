@@ -1,6 +1,6 @@
 all:	clean case tracklen PCB/Test/Test.scad PCB/Test/Test1.kicad_pcb PCB/Test/Test2.kicad_pcb
 
-case:	case.c pcb.c models case.scad
+case:	case.c pcb.c models case-scad
 	gcc -O -o $@ $< pcb.c -lpopt -lm -g
 
 clean:	clean.c pcb.c QR/iec18004.o QR/Reedsol/reedsol.o Datamatrix/iec16022ecc200.o
