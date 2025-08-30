@@ -13,5 +13,9 @@ if(hole)
 }
 if(block)
 {
-	translate([0,0.45,1.8])cylinder(d1=4.4,d2=8,h=height+1,$fn=6);
+	hull()
+	{
+		translate([0,0.45,1.8])cylinder(d=4.4,$fn=24);
+		translate([0,0.45,height])cylinder(d=8,h=height+1,$fn=6);
+	}
 }
