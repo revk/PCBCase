@@ -82,13 +82,13 @@ write_scad (pcb_t * pcb, int tb)
     *o3;
    /* making scad file */
    char *filename = strdup (scadfile);
-   if (twofile && tb)
+   if (twofile)
    {
       char *c = strrchr (filename, '.');
-      if (c && c > filename && c[-1] == 'T')
-         c[-1] = 'B';
+      if (c && c > filename && (c[-1] == 'T' || c[-1] == 'B'))
+         c[-1] = (tb ? 'B' : 'T');
       else
-         errx (1, "Filename must end T.scad for --two-file");
+         errx (1, "Filename must end T.scad or B.scad for --two-file");
    }
    FILE *f = stdout;
    if (strcmp (filename, "-"))
@@ -821,7 +821,7 @@ write_scad (pcb_t * pcb, int tb)
          fprintf (f, "difference(){");
       fprintf (f, "bottom();");
       if (date && *date && datet > 0 && dateh > 0)
-         fprintf (f,"datecode();}");
+         fprintf (f, "datecode();}");
    }
    if (debug)
       fprintf (f, "translate([spacing*2,0,0])preview();\n");
