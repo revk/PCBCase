@@ -652,21 +652,22 @@ write_scad (pcb_t * pcb, int tb)
             n = add_module (footprint, ref, NULL, &index);
          }
 
+         if (debug && ref)
+            warnx ("Module %s %s%s", ref, ref, back ? " (back)" : "");
+         fprintf (f, "module %s(){", ref);
+         if ((o3 = pcb_find (o, "at", NULL)) && o3->valuen >= 2 && o3->values[0].isnum && o3->values[1].isnum)
+         {
+            fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num - originx, originy - o3->values[1].num,
+                     back ? 0 : pcbthickness);
+            if (o3->valuen >= 3 && o3->values[2].isnum)
+               fprintf (f, "rotate([0,0,%lf])", o3->values[2].num);
+         }
+         if (back)
+            fprintf (f, "rotate([180,0,0])");
+         fprintf (f, "children();}\n");
+
          if (n >= 0)
          {                      // footprint level orientation
-            if (debug && ref)
-               warnx ("Module %s %s%s", ref, ref, back ? " (back)" : "");
-	    fprintf(f,"module %s(){",ref);
-            if ((o3 = pcb_find (o, "at", NULL)) && o3->valuen >= 2 && o3->values[0].isnum && o3->values[1].isnum)
-            {
-               fprintf (f, "translate([%lf,%lf,%lf])", o3->values[0].num - originx, originy - o3->values[1].num,
-                        back ? 0 : pcbthickness);
-               if (o3->valuen >= 3 && o3->values[2].isnum)
-                  fprintf (f, "rotate([0,0,%lf])", o3->values[2].num);
-            }
-            if (back)
-               fprintf (f, "rotate([180,0,0])");
-	    fprintf(f,"children();}\n");
             fprintf (f, "module part_%s(part=true,hole=false,block=false)\n{\n", ref);
             if ((o3 = pcb_find (o, "at", NULL)) && o3->valuen >= 2 && o3->values[0].isnum && o3->values[1].isnum)
             {
