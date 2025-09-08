@@ -140,6 +140,7 @@ write_scad (pcb_t * pcb, int tb)
    fprintf (f, "snap=%lf;\n", snap);
    fprintf (f, "edge=%lf;\n", edge);
    fprintf (f, "pcbthickness=%lf;\n", pcbthickness);
+   fprintf (f, "function pcbthickness()=%lf;\n", pcbthickness);
    fprintf (f, "nohull=%s;\n", nohull ? "true" : "false");
    fprintf (f, "hullcap=%lf;\n", hullcap);
    fprintf (f, "hulledge=%lf;\n", hulledge);
@@ -465,7 +466,9 @@ write_scad (pcb_t * pcb, int tb)
          originy = (hy + ly) / 2;
       fprintf (f, "spacing=%lf;\n", spacing);
       fprintf (f, "pcbwidth=%lf;\n", edgewidth);
+      fprintf (f, "function pcbwidth()=%lf;\n", edgewidth);
       fprintf (f, "pcblength=%lf;\n", edgelength);
+      fprintf (f, "function pcblength()=%lf;\n", edgelength);
       fprintf (f, "originx=%lf;\n", originx);
       fprintf (f, "originy=%lf;\n", originy);
       outline (casework, "outline");    // Updates min/max before output
