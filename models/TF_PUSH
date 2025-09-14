@@ -10,5 +10,5 @@ if(part)
 if(hole)
 {
 	b(-0.95,-4.7-5,0.75,11.5,25,1.5);	// Card
-	translate([0,-8.47-10,-height])sphere(r=10,h=height*2);
+	translate([0,-8.47-10,-height])cylinder(r=10,h=height*2);
 }
