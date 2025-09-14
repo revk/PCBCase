@@ -2,6 +2,7 @@ if(part)
 {
 	b(0,0.5,0,12.2,13,1);
 	b(0,-6-10,1,9.6,20,12);
+	for(x=[-6,6])translate([x,0,0])cylinder(d=3,h=5);
 }
 if(hole)
 {
