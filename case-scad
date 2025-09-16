@@ -234,7 +234,7 @@ module top_body()
 		intersection()
 		{
 			solid_case();
-			pcb_hulled(height);
+			pcb_hulled(casetop+pcbthickness);
 		}
 		if(parts_top)minkowski()
 		{
@@ -245,7 +245,7 @@ module top_body()
 	}
 	intersection()
 	{
-		pcb_hulled(height);
+		pcb_hulled(casetop+pcbthickness);
 		union()
 		{
 			parts_top(block=true);
@@ -294,7 +294,7 @@ module bottom_body()
 		intersection()
 		{
 			solid_case();
-			translate([0,0,-height])pcb_hulled(height+pcbthickness);
+			translate([0,0,-casebottom])pcb_hulled(casebottom+pcbthickness);
 		}
 		if(parts_bottom)minkowski()
 		{
@@ -305,7 +305,7 @@ module bottom_body()
 	}
 	intersection()
 	{
-		translate([0,0,-height])pcb_hulled(height+pcbthickness);
+		translate([0,0,-casebottom])pcb_hulled(casebottom+pcbthickness);
 		union()
 		{
 			parts_top(block=true);
