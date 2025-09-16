@@ -246,7 +246,11 @@ module top_body()
 	intersection()
 	{
 		solid_case();
-		parts_top(block=true);
+		union()
+		{
+			parts_top(block=true);
+			parts_bottom(block=true);
+		}
 	}
 }
 
@@ -302,7 +306,11 @@ module bottom_body()
 	intersection()
 	{
 		solid_case();
-		parts_bottom(block=true);
+		union()
+		{
+			parts_top(block=true);
+			parts_bottom(block=true);
+		}
 	}
 }
 
