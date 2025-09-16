@@ -14,5 +14,5 @@ if(hole)
 }
 if(block)
 {
-    translate([1,0,-pcbthickness-5])cylinder(d=2,h=5);
+    translate([1,0,-pcbthickness-5])cylinder(d=3,h=5);
 }
