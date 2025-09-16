@@ -12,3 +12,7 @@ if(hole)
 			translate([0.75+casewall+1,0,0])cylinder(d=1,h=pcbthickness+0.02);
 		}
 }
+if(block)
+{
+    translate([1,0,-pcbthickness-5])cylinder(d=2,h=5);
+}
