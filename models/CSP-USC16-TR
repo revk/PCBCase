@@ -16,15 +16,15 @@ rotate([-90,0,0])translate([-4.47,-3.84,0])
 		translate([0,1.7,0])cube([8.94,1.6,1.6301]);
 	}
 	if(hole)
-		translate([1.63,-20,1.63])
+		translate([1.63,-21.2-1.5,1.63])
 		rotate([-90,0,0])
 	{
 		// Plug
 		hull()
 		{
-			cylinder(d=2.5,h=21,$fn=24);
+			cylinder(d=2.5,h=24,$fn=24);
 			translate([5.68,0,0])
-			cylinder(d=2.5,h=21,$fn=24);
+			cylinder(d=2.5,h=24,$fn=24);
 		}
 		hull()
 		{
