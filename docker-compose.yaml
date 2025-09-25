@@ -1,0 +1,16 @@
+services:
+  pcbcase:
+    build: .
+    image: pcbcase:latest
+    working_dir: /workbench
+    volumes:
+      - ./:/workbench
+    command:
+      - sh
+      - -c
+      - |
+        # Step 1: Generate a .scad model from the sample KiCad PCB file
+        /usr/local/bin/case -o PCB/Test/Test.scad PCB/Test/Test.kicad_pcb -M models
+
+        # Step 2: Render the .scad file into a printable .stl file with OpenSCAD
+        # openscad -o PCB/Test/Test.stl PCB/Test/Test.scad
