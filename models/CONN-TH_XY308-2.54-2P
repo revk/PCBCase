@@ -1,3 +1,13 @@
 if(part) {
     b(0,0,0,6.5,7.0,8.5);
 }
+
+// Two wire tunnels, centered at ±1.27 mm (pitch/2) and mid-height (≈4.25 mm).
+// Extruded along board Y to pass through the case wall.
+if(hole)
+{
+    // left pole
+    translate([-1.27, -50, 2.25])  rotate([-90,0,0]) cylinder(d=2.2, h=50, $fn=24);
+    // right pole
+    translate([ 1.27, -50, 2.25])  rotate([-90,0,0]) cylinder(d=2.2, h=50, $fn=24);
+}
