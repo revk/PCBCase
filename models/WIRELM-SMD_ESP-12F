@@ -1,1 +1,13 @@
-if(part)b(0,0,0,24.0,16.0,3.0);
+// ESP-12F: 24 x 16 x {3.0 can, 1.6 antenna}
+// Centered on the footprint origin. Antenna is on the +X end.
+// Flip the X offsets (change signs) if your board places the antenna the other way.
+
+off = 6.5;
+if(part)
+{
+    // Shielded can (centered at y = -4.75)
+    b(0,-4.75 + off,0,16.0,14.5,3.0);
+
+    // Antenna FR-4 (centered at y = +7.25)
+    b(0, 7.25 + off,0,16.0, 9.5,1.6);
+}
