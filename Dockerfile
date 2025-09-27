@@ -2,7 +2,7 @@
 ##
 ## Stage 1 — build the PCBCase binaries
 ##
-FROM debian:bookworm-slim AS build
+FROM debian:trixie-slim AS build
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential git ca-certificates pkg-config libpopt-dev \
@@ -21,10 +21,9 @@ RUN make
 ##
 ## Stage 2 — minimal runtime with OpenSCAD CLI to render STL/3MF
 ##
-FROM debian:bookworm-slim
+FROM openscad/openscad:trixie.2025-09-22
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    openscad libpopt0 \
+RUN apt-get update && apt-get install -y --no-install-recommends libpopt0 \
  && rm -rf /var/lib/apt/lists/*
 
 # Where you'll mount your boards/files from the host
