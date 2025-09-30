@@ -35,6 +35,8 @@ const char *ignore = NULL;
 double pcbthickness = 0;
 double casebottom = 5;
 double casetop = 5;
+double bottomthickness = 0;
+double topthickness = 0;
 double casewall = 3;
 double lip = 3;
 int lipa = 0;
@@ -133,9 +135,11 @@ write_scad (pcb_t * pcb, int tb)
    fprintf (f, "lip=%lf;\n", lip);
    fprintf (f, "lipa=%d;\n", lipa);
    fprintf (f, "lipt=%d;\n", lipt);
+   fprintf (f, "casewall=%lf;\n", casewall);
    fprintf (f, "casebottom=%lf;\n", casebottom);
    fprintf (f, "casetop=%lf;\n", casetop);
-   fprintf (f, "casewall=%lf;\n", casewall);
+   fprintf (f, "bottomthickness=%lf;\n", bottomthickness);
+   fprintf (f, "topthickness=%lf;\n", topthickness);
    fprintf (f, "fit=%lf;\n", fit);
    fprintf (f, "snap=%lf;\n", snap);
    fprintf (f, "edge=%lf;\n", edge);
@@ -868,6 +872,8 @@ main (int argc, const char *argv[])
          {"ignore", 'I', POPT_ARG_STRING, &ignore, 0, "Ignore", "ref{,ref}"},
          {"bottom", 'b', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &casebottom, 0, "Case bottom", "mm"},
          {"top", 't', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &casetop, 0, "Case top", "mm"},
+         {"bottom-thickness", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &bottomthickness, 0, "Case bottom max thickness", "mm"},
+         {"top-thickness", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &topthickness, 0, "Case top max thickness", "mm"},
          {"wall", 'w', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &casewall, 0, "Case wall", "mm"},
          {"edge", 'e', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &edge, 0, "Case edge", "mm"},
          {"fit", 'f', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fit, 0, "Case fit (oversize the lip)", "mm"},

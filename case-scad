@@ -240,6 +240,7 @@ module top_body()
 		{
 			if(nohull)parts_top(part=true);
 			else hull(){parts_top(part=true);pcb_hulled();}
+			if(topthickness)pcb_hulled(casetop+pcbthickness-topthickness,0);
 			translate([0,0,margin-height])cylinder(r=margin*2,h=height,$fn=8);
 		}
 	}
@@ -300,6 +301,7 @@ module bottom_body()
 		{
 			if(nohull)parts_bottom(part=true);
 			else hull()parts_bottom(part=true);
+			if(bottomthickness)translate([0,0,bottomthickness-casebottom])pcb_hulled(casebottom+pcbthickness-bottomthickness,0);
 			translate([0,0,-margin])cylinder(r=margin*2,h=height,$fn=8);
 		}
 	}
