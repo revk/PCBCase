@@ -1,0 +1,9 @@
+if(part)
+{
+    // Body envelope (slightly conservative)
+    b(0, 0, 0, 1.4, 3.0, 1.0);
+    // Pads / leads — three pad blocks
+    b(-0.94, -0.95, 0, 1.48, 0.6, 0.5);
+    b(-0.94,  0.95, 0, 1.48, 0.6, 0.5);
+    b( 0.94,  0.00, 0, 1.48, 0.6, 0.5);
+}

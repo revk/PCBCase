@@ -1,0 +1,19 @@
+if(part)
+{
+    b(0,0,0,8.64,7.35,3.26);
+}
+
+if(hole)
+{
+    // Side tunnel with same face as the shell:
+    // cross-section ≈ 8.64 (wide) × 3.26 (high), extruded along X.
+    // By default it goes LEFT from the connector center. To go RIGHT, change "-60" to "+60".
+    translate([0,0,1.63])         // Shift up by half the connector height (1.63 mm)
+    rotate([90,0,0])           // make extrusion run along the board X axis
+    hull()
+    {
+        // racetrack cross-section using two posts, spaced to make overall 8.64 mm width
+        translate([(8.64-3.26)/2,0,0])  cylinder(d=3.26, h=120, $fn=24);
+        translate([-(8.64-3.26)/2,0,0]) cylinder(d=3.26, h=120, $fn=24);
+    }
+}
