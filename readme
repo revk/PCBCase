@@ -6,7 +6,7 @@ setenv D "$1:h"
 cd "$D"
 setenv RM "$1:t"
 
-if(-e "$RM") then
+if(-e "$RM" || ! -z "$RM") then
 	grep -q "Auto generated " "$RM"
 	if($status) then
 		# Non auto file exists
