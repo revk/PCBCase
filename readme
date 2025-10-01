@@ -45,9 +45,9 @@ if("$stl" != '*.stl') then
 	echo "" >> "$TMP"
 	set c=0;
 	foreach s ($stl)
-		echo "import("'"'"$s:t"'"'");" >> "$s:r.scad"
-		/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD --autocenter --viewall --render -o $s:r.png "$s:r.scad" --backend GCAL
-		rm -f "$s:r.scad"
+		echo "import("'"'"$s:t"'"'");" >> "x$s:r.scad"
+		/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD --autocenter --viewall --render -o $s:r.png "x$s:r.scad" --backend GCAL
+		rm -f "x$s:r.scad"
 	end
 	foreach s ($stl)
 		setenv N `echo "$s" | sed 's/[BT].stl$//'`
