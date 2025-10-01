@@ -49,10 +49,15 @@ if("$stl" != '*.stl') then
 		if("$N" != "$s" && "$s" != "${N}T.stl" && -e "${N}B.stl" && -e "${N}T.stl") then
 			@ c = $c + 1
 			if($c == 1) then
-				echo "|Design|Bottom|Top|" >> "$TMP"
-				echo "|------|------|---|" >> "$TMP"
+				echo "|Design|Bottom|Top|---|" >> "$TMP"
+				echo "|------|------|---|===|" >> "$TMP"
 			endif
-			echo "|$N|[${N}B](${N}B.stl)|[${N}T](${N}T.stl)|" >> "$TMP"
+			echo -n "|$N|[${N}B](${N}B.stl)|[${N}T](${N}T.stl)|" >> "$TMP"
+			if(-e $s:r.png) then
+				echo "<img src='"$s:r.png"' width=25%>|" >> "$TMP"
+			else
+				echo "|" >> "$TMP"
+			endif
 		endif
 	end
 	if($c) then
