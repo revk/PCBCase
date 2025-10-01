@@ -48,7 +48,7 @@ if("$stl" != '*.stl') then
 	foreach s ($stl)
 		echo "import("'"'"$s:t"'"'");" >> "x$s:r.scad"
 		/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD --autocenter --viewall --render --imsize=2048,2048 -o "$s:r.png" "x$s:r.scad" --backend CGAL
-		convert "$s:r.png" --resize 512x512 "$s:r.png"
+		convert "$s:r.png" -resize 512x512 "$s:r.png"
 		rm -f "x$s:r.scad"
 	end
 	foreach s ($stl)
