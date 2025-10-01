@@ -80,7 +80,7 @@ endif
 if("$pcb" != '*.kicad_pcb') then
 	foreach p ($pcb)
 		setenv BOARD "$p:r"
-		echo "## Images" >> "$TMP"
+		echo "## PCB Images" >> "$TMP"
 		echo "" >> "$TMP"
 		echo -n "<img src='$BOARD.png' width=32%>" >> "$TMP"
 		echo -n "<img src='$BOARD-90.png' width=32%>" >> "$TMP"
