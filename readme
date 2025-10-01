@@ -57,7 +57,7 @@ if("$stl" != '*.stl') then
 				echo "|Design|Bottom|---|Top|---|" >> "$TMP"
 				echo "|------|------|---|---|---|" >> "$TMP"
 			endif
-			echo "|$N|[${N}B](${N}B.stl)|[${N}T](${N}T.stl)|<img src='${N}B.png' size=25%>|<img src='${N}T.png' size=25%>|" >> "$TMP"
+			echo "|$N|[${N}B](${N}B.stl)|<img src='${N}B.png' size=15%>|[${N}T](${N}T.stl)|<img src='${N}T.png' size=15%>|" >> "$TMP"
 		endif
 	end
 	if($c) then
