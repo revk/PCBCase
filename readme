@@ -45,17 +45,19 @@ if("$stl" != '*.stl') then
 	echo "" >> "$TMP"
 	set c=0;
 	foreach s ($stl)
+		echo "import("'"'"$s:t"'"'");" >> "$s:r.scad"
+		/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD -o $s:r.png "$s:r.scad"
+		rm -f "$s:r.scad"
+	end
+	foreach s ($stl)
 		setenv N `echo "$s" | sed 's/[BT].stl$//'`
 		if("$N" != "$s" && "$s" != "${N}T.stl" && -e "${N}B.stl" && -e "${N}T.stl") then
 			@ c = $c + 1
 			if($c == 1) then
-				echo "|Design|Bottom|Top|---|" >> "$TMP"
-				echo "|------|------|---|===|" >> "$TMP"
+				echo "|Design|Bottom|---|Top|---|" >> "$TMP"
+				echo "|------|------|---|---|---|" >> "$TMP"
 			endif
-			echo "import("'"'"$s:t"'"'");" >> "$s:r.scad"
-			/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD -o $s:r.png "$s:r.scad"
-			rm -f "$s:r.scad"
-			echo "|$N|[${N}B](${N}B.stl)|[${N}T](${N}T.stl)|<img src='$s:r.png' size=25%>|" >> "$TMP"
+			echo "|$N|[${N}B](${N}B.stl)|[${N}T](${N}T.stl)|<img src='${N}B:png' size=25%>|<img src='${N}T:png' size=25%>|" >> "$TMP"
 		endif
 	end
 	if($c) then
