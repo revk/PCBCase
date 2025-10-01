@@ -46,7 +46,7 @@ if("$stl" != '*.stl') then
 	set c=0;
 	foreach s ($stl)
 		echo "import("'"'"$s:t"'"'");" >> "$s:r.scad"
-		/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD -o $s:r.png "$s:r.scad"
+		/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD -o $s:r.png "$s:r.scad" --backend GCAL
 		rm -f "$s:r.scad"
 	end
 	foreach s ($stl)
