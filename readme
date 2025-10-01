@@ -52,10 +52,9 @@ if("$stl" != '*.stl') then
 				echo "|Design|Bottom|Top|---|" >> "$TMP"
 				echo "|------|------|---|===|" >> "$TMP"
 			endif
-			setenv T `mktemp -u`.scad
-			echo "import("'"'"$s"'""'");" >> "$T"
-			/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD -o $s:r.png "$T"
-			rm -f "$T"
+			echo "import("'"'"$s:t"'""'");" >> "$s:r.scad"
+			/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD -o $s:r.png "$s:r.scad"
+			rm -f "$s:r.scad"
 			echo "|$N|[${N}B](${N}B.stl)|[${N}T](${N}T.stl)|<img src='$s:r.png' size=25%>|" >> "$TMP"
 		endif
 	end
