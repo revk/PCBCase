@@ -35,6 +35,7 @@ if("$pcb" != '*.kicad_pcb') then
 	foreach p ($pcb)
 		echo "- [$p:r]($p:r.kicad_pro)" >> "$TMP"
 	endif
+	echo "" >> "$TMP"
 endif
 
 
