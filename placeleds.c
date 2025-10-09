@@ -26,7 +26,8 @@ main (int argc, const char *argv[])
    int count = 0;
    double spacing = 0;
    double trackwidth = 0.2;
-   double padoffset = 0.6010407;
+   double padoffsetx = 0.6010407;
+   double padoffsety = 0.6010407;
    double padsize = 0.3181981;  // extra to diagonal on power
    double clearance = 0.127;
    double capoffset = 1.15;
@@ -37,6 +38,7 @@ main (int argc, const char *argv[])
    double diameter = 0;
    double radius = 0;
    double angle = 0;
+   double rotate=-135;
    int group = 0;
    int sides = 0;
    int tracks = 0;
@@ -45,8 +47,13 @@ main (int argc, const char *argv[])
    double powervias = 0;
    const char *fill = NULL;
    const char *layer = NULL;
-   poptContext optCon;
+   int SMD1010=0;
+   int SMD1615=0;
+   int SMD2020=0;
+   int capbelow=0;
+   int powertrack=1;
    // TODO reverse option and B.Cu logic
+   poptContext optCon=NULL;
    {
       const struct poptOption optionsTable[] = {
          {"pcb-file", 0, POPT_ARG_STRING, &pcbfile, 0, "PCB file", "filename"},
@@ -62,8 +69,10 @@ main (int argc, const char *argv[])
          {"zone-in", 0, POPT_ARG_DOUBLE, &zonei, 0, "Zone inside ", "mm"},
          {"zone-out", 0, POPT_ARG_DOUBLE, &zoneo, 0, "Zone outside ", "mm"},
          {"angle", 'd', POPT_ARG_DOUBLE, &angle, 0, "Angle offset", "degrees"},
+         {"rotate", 0, POPT_ARG_DOUBLE|POPT_ARGFLAG_SHOW_DEFAULT, &rotate, 0, "Diode rotate", "degrees"},
          {"group", 0, POPT_ARG_INT, &group, 0, "Group LEDs (ring)", "N"},
-         {"pad-offset", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &padoffset, 0, "Pad offset (square)", "mm"},
+         {"pad-offset-x", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &padoffsetx, 0, "Pad offset X", "mm"},
+         {"pad-offset-y", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &padoffsety, 0, "Pad offset Y", "mm"},
          {"cap-offset", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &capoffset, 0, "Cap offset", "mm"},
          {"via-offset", 0, POPT_ARG_DOUBLE, &viaoffset, 0, "Via offset", "mm"},
          {"tracks", 0, POPT_ARG_NONE, &tracks, 0, "Add tracks"},
@@ -72,6 +81,10 @@ main (int argc, const char *argv[])
          {"fill", 0, POPT_ARG_STRING, &fill, 0, "Fill GND/POWER", "Power net name"},
          {"startx", 'x', POPT_ARG_DOUBLE, &startx, 0, "Left (grid) / Centre (ring)", "X"},
          {"starty", 'y', POPT_ARG_DOUBLE, &starty, 0, "Top (grid) / Centre (ring)", "Y"},
+         {"cap-below", 0, POPT_ARG_NONE, &capbelow, 0, "Cap below not in-line"},
+         {"SMD1010", 0, POPT_ARG_NONE, &SMD1010, 0, "SMD1010 LEDs"},
+         {"SMD1615", 0, POPT_ARG_NONE, &SMD1615, 0, "SMD1615 LEDs"},
+         {"SMD2020", 0, POPT_ARG_NONE, &SMD2020, 0, "SMD2020 LEDs"},
          {"debug", 'v', POPT_ARG_NONE, &debug, 0, "Debug"},
          POPT_AUTOHELP {}
       };
@@ -90,6 +103,14 @@ main (int argc, const char *argv[])
          poptPrintUsage (optCon, stderr, 0);
          return -1;
       }
+   }
+   if(SMD1615)
+   {	// Settings for SMD1615 (1.6mm x 1.5mm)
+	   rotate=180;
+	   capbelow=1;
+	   powertrack=0;
+	   padoffsetx=0.625;
+	   padoffsety=0.475;
    }
    if (radius && !diameter)
       diameter = radius * 2;
@@ -120,14 +141,14 @@ main (int argc, const char *argv[])
    if (!viaoffset)
       viaoffset = !diameter ? 1.9 : 1.15;
    if (isnan (zonei))
-      zonei = padoffset + padsize + clearance;
+      zonei = padoffsety + padsize + clearance;
    else
       zonei -= clearance / 2;
    if (isnan (zoneo))
-      zoneo = padoffset + padsize + clearance;
+      zoneo = padoffsety + padsize + clearance;
    else
       zoneo -= clearance / 2;
-   double pada = 2 * padoffset / diameter;      // Angle for pad offset
+   double padax = 2 * padoffsetx / diameter;      // Angle for pad offset
    double viaa = 2 * vias / diameter;   // Angle for via offset
    double spacinga = 2 * spacing / diameter;    // Angle for spacing of groups
    pcb_t *pcb = pcb_load (pcbfile);
@@ -177,13 +198,58 @@ main (int argc, const char *argv[])
    double dioder (int d)
    {
       if (diameter)
-         return -135 - ad (d) * 180 / M_PI;
-      return sides ? -135 : 135;
+         return rotate - ad (d) * 180 / M_PI;
+      return sides ? rotate:-rotate;
+   }
+   enum{DI,DO,GND,VCC};
+   double padx(int d,int n)
+   {
+	   if(SMD1615||SMD2020)switch(n)
+	   {
+		   case GND:
+			   return cx(d,padax,padoffsety);
+		   case VCC:
+			   return cx(d,-padax,-padoffsety);
+		   case DO:
+			   return cx(d,padax,-padoffsety);
+		   case DI:
+			   return cx(d,-padax,padoffsety);
+	   }else switch(n)
+	   { // Default is SMD1010 (diagonal)
+		   case GND:
+			   return cx(d,0,padoffsety);
+		   case VCC:
+			   return cx(d,0,-padoffsety);
+		   case DI:return cx(d,-padax,0);
+		   case DO:return cx(d,padax,0);
+	   }
+   }
+   double pady(int d,int n)
+   {
+	   if(SMD1615||SMD2020)switch(n)
+	   {
+		   case GND:
+			   return cy(d,padax,padoffsety);
+		   case VCC:
+			   return cy(d,-padax,-padoffsety);
+		   case DO:
+			   return cy(d,padax,-padoffsety);
+		   case DI:
+			   return cy(d,-padax,padoffsety);
+	   }else switch(n)
+	   { // Default is SMD1010 (diagonal)
+		   case GND:return cy(d,0,padoffsety);
+		   case VCC:return cy(d,0,-padoffsety);
+		   case DI:
+			    return cy(d,-padax,0);
+		   case DO:
+			    return cy(d,padax,0);
+	   }
    }
    double capx (int c)
    {
       if (diameter)
-         return cx (0.5 + c, 0, 0);
+         return cx (0.5 + c, 0, capbelow?-zonei:0);
       if (sides)
          return (c & 1) ? startx + spacing * (cols - 1) + capoffset : startx - capoffset;
       return startx + spacing * (c / 2);
@@ -191,7 +257,7 @@ main (int argc, const char *argv[])
    double capy (int c)
    {
       if (diameter)
-         return cy (0.5 + c, 0, 0);
+         return cy (0.5 + c, 0, capbelow?-zonei:0);
       if (sides)
          return starty + spacing * (c / 2);
       return (c & 1) ? starty + spacing * (rows - 1) + capoffset : starty - capoffset;
@@ -199,7 +265,7 @@ main (int argc, const char *argv[])
    double capr (int c)
    {
       if (diameter)
-         return 90 - ad (0.5 + c) * 180 / M_PI;
+         return 90 - ad (0.5 + c) * 180 / M_PI+(capbelow?180:0);
       return sides ? 90 : 0;
    }
 
@@ -539,7 +605,7 @@ main (int argc, const char *argv[])
    {
       if (diameter)
       {                         // Ring
-         int tooclose = ((!group && (M_PI * 2 - (ad (count - 0.5) - angle * M_PI / 180)) < pada * 4 + viaa * 4) || (group && spacing < padoffset * 6 + viaa * 4));      // Too close together for data pins together at end
+         int tooclose = ((!group && (M_PI * 2 - (ad (count - 0.5) - angle * M_PI / 180)) < padax * 4 + viaa * 4) || (group && spacing < padoffsetx * 6 + viaa * 4));      // Too close together for data pins together at end
          double m = trackwidth / 2 + clearance + powervias / 2;
          double zi = zonei - powervias / 2;
          if (zi < m)
@@ -553,117 +619,139 @@ main (int argc, const char *argv[])
             zo = (m + zo) / 2;
          // Data
          for (int d = 0; d < count - 1; d++)
-            track (cx (d, pada, 0), cy (d, pada, 0),
-                   cx (0.5 + d, 0, 0), cy (0.5 + d, 0, 0), cx (1 + d, -pada, 0), cy (1 + d, -pada, 0), trackwidth);
+            track (padx(d,DO),pady(d,DO),//
+                   cx (0.5 + d, 0, 0), cy (0.5 + d, 0, 0), //
+		   padx(1+d,DI),pady(1+d,DI), trackwidth);
          // Data end
          if (tooclose)
          {                      // Straight out to pad
-            trackvia (cx (0, -pada, 0), cy (0, -pada, 0), cx (count - 0.25, 0, -viaoffset), cy (count - 0.25, 0, -viaoffset),
-                      trackwidth, vias);
-            trackvia (cx (count - 1, pada, 0), cy (count - 1, pada, 0), cx (count - 0.75, 0, viaoffset),
-                      cy (count - 0.75, 0, viaoffset), trackwidth, vias);
+				 double o=(capbelow?0.333:0.25);
+	   track(padx(0,DI),pady(0,DI),//
+						   NAN,NAN,
+	   cx(count-o,0,padoffsety),cy(count-o,0,padoffsety),trackwidth);					   
+	   trackvia(cx(count-o,0,padoffsety),cy(count-o,0,padoffsety),//
+							 cx (count - o, 0, -viaoffset), cy (count - o, 0, -viaoffset), //
+                                                                                            trackwidth, vias);
+	   track(padx(count-1,DO),pady(count-1,DO),//
+						   NAN,NAN,
+	   cx(count-1+o,0,-padoffsety),cy(count-1+o,0,-padoffsety),trackwidth);					   
+	   trackvia(cx(count-1+o,0,-padoffsety),cy(count-1+o,0,-padoffsety),//
+							 cx (count - 1+o, 0, viaoffset), cy (count - 1+o, 0, viaoffset), //
+                                                                                            trackwidth, vias);
          } else
          {
-            trackvia (cx (0, -pada, 0), cy (0, -pada, 0), cx (0, -pada - viaa, -vias / 2), cy (0, -pada - viaa, -vias / 2),
+            track (padx(0,DI),pady(0,DI),//
+					 NAN,NAN,
+                   cx (0, -padax - viaa, padoffsety), cy (0, -padax - viaa , padoffsety), trackwidth);
+            trackvia (cx (0, -padax - viaa, padoffsety), cy (0, -padax - viaa , padoffsety),//
+			    cx (0, -padax - viaa, -vias / 2), cy (0, -padax - viaa, -vias / 2), //
                       trackwidth, vias);
-            track (cx (count - 1, pada, 0), cy (count - 1, pada, 0), cx (count - 0.5, 0, 0), cy (count - 0.5, 0, 0),
-                   cx (0, -pada - viaa * 3, 0), cy (0, -pada - viaa * 3, 0), trackwidth);
-            trackvia (cx (0, -pada - viaa * 3, 0), cy (0, -pada - viaa * 3, 0), cx (0, -pada - viaa * 3, -vias / 3),
-                      cy (0, -pada - viaa * 3, -vias / 2), trackwidth, vias);
+            track (padx(count-1,DO),pady(count-1,DO),//
+			    cx (count - 0.5, 0, 0), cy (count - 0.5, 0, 0), //
+                   cx (0, -padax - viaa * 3, 0), cy (0, -padax - viaa * 3, 0), trackwidth);
+            trackvia (cx (0, -padax - viaa * 3, 0), cy (0, -padax - viaa * 3, 0), //
+			    cx (0, -padax - viaa * 3, -vias / 3), cy (0, -padax - viaa * 3, -vias / 2), trackwidth, vias);
          }
          // Power
+	 if(powertrack)
+	 {
          for (int d = 0; d < count - 1; d++)
          {
-            track (cx (d, 0, padoffset), cy (d, 0, padoffset), cx (0.5 + d, 0, padoffset), cy (0.5 + d, 0, padoffset),
-                   cx (1 + d, 0, padoffset), cy (1 + d, 0, padoffset), trackwidth);
-            track (cx (d, 0, -padoffset), cy (d, 0, -padoffset), cx (0.5 + d, 0, -padoffset), cy (0.5 + d, 0, -padoffset),
-                   cx (1 + d, 0, -padoffset), cy (1 + d, 0, -padoffset), trackwidth);
+            track (padx(d,GND),pady(d,GND),//
+					   cx (0.5 + d, 0, padoffsety), cy (0.5 + d, 0, padoffsety), //
+												    padx(1+d,GND),pady(1+d,GND),trackwidth); 
+            track (padx(d,VCC),pady(d,VCC), //
+					    cx (d, 0, -padoffsety), cy (d, 0, -padoffsety),//
+											  padx(1+d,VCC),pady(1+d,VCC),trackwidth);
          }
          // Power end
-         track (cx (count - 0.5, 0, padoffset), cy (count - 0.5, 0, padoffset), cx (count - 0.25, 0, padoffset),
-                cy (count - 0.25, 0, padoffset), cx (0, 0, padoffset), cy (0, 0, padoffset), trackwidth);
-         track (cx (count - 1, 0, -padoffset), cy (count - 1, 0, -padoffset), cx (count - 0.75, 0, -padoffset),
-                cy (count - 0.75, 0, -padoffset), cx (count - 0.5, 0, -padoffset), cy (count - 0.5, 0, -padoffset), trackwidth);
+         track (cx (count - 0.5, 0, padoffsety), cy (count - 0.5, 0, padoffsety),//
+										 cx (count - 0.25, 0, padoffsety), cy (count - 0.25, 0, padoffsety),//
+																		   padx(0,GND),pady(0,GND),trackwidth);
+         track (padx(count-1,VCC),pady(count-1,VCC),
+										cx (count - 0.75, 0, -padoffsety), cy (count - 0.75, 0, -padoffsety),//
+										cx (count - 0.5, 0, -padoffsety), cy (count - 0.5, 0, -padoffsety), trackwidth);
+	 }
          // Power vias
          if (powervias)
          {
-            for (int d = 0; d < count; d++)
-               trackviamaybe (cx (d, -pada, padoffset), cy (d, -pada, padoffset), cx (d, -pada, viaoffset),
-                              cy (d, -pada, viaoffset), trackwidth, powervias, "GND");
-            for (int d = 0; d < count; d++)
-               trackviamaybe (cx (d, pada, -padoffset), cy (d, pada, -padoffset), cx (d, pada, -viaoffset),
-                              cy (d, pada, -viaoffset), trackwidth, powervias, fill ? : "VCC");
+            for (int d = 1; d < count-1; d++)
+               trackviamaybe (padx(d,GND),pady(d,GND), //
+                              cx(d+padax+0.25,0,viaoffset),cy (d+padax+0.25,0, viaoffset), trackwidth, powervias, "GND");
+            for (int d = 1; d < count-1; d++)
+               trackviamaybe (padx(d,VCC),pady(d,VCC),//
+                              cx(d-padax-0.25,0,-viaoffset),cy (d-padax-0.25, 0, -viaoffset), trackwidth, powervias, fill ? : "VCC");
          }
       } else if (sides)
       {                         // Grid with caps on sides
          for (int r = 0; r < rows; r++)
          {
-            track (diodex (r * cols) - viaoffset, diodey (r * cols), NAN, NAN, diodex (r * cols) - padoffset, diodey (r * cols),
+            track (diodex (r * cols) - viaoffset, diodey (r * cols), NAN, NAN, diodex (r * cols) - padoffsety, diodey (r * cols),
                    trackwidth);
-            trackvia (diodex (r * cols + cols - 1) + padoffset, diodey (r * cols + cols - 1),
+            trackvia (diodex (r * cols + cols - 1) + padoffsety, diodey (r * cols + cols - 1),
                       diodex (r * cols + cols - 1) + viaoffset, diodey (r * cols + cols - 1), trackwidth, vias);
          }
          for (int r = 0; r < rows; r++)
             for (int c = 0; c < cols - 1; c++)
-               track (diodex (c + r * cols) + padoffset, diodey (c + r * cols), NAN, NAN, diodex (c + r * cols + 1) - padoffset,
+               track (diodex (c + r * cols) + padoffsety, diodey (c + r * cols), NAN, NAN, diodex (c + r * cols + 1) - padoffsety,
                       diodey (c + r * cols + 1), trackwidth);
          for (int r = 0; r < rows; r++)
          {
-            track (diodex (r * cols) - capoffset, diodey (r * cols) - padoffset, NAN, NAN, diodex (r * cols),
-                   diodey (r * cols) - padoffset, trackwidth);
-            track (diodex (r * cols) - capoffset, diodey (r * cols) + padoffset, NAN, NAN, diodex (r * cols),
-                   diodey (r * cols) + padoffset, trackwidth);
+            track (diodex (r * cols) - capoffset, diodey (r * cols) - padoffsety, NAN, NAN, diodex (r * cols),
+                   diodey (r * cols) - padoffsety, trackwidth);
+            track (diodex (r * cols) - capoffset, diodey (r * cols) + padoffsety, NAN, NAN, diodex (r * cols),
+                   diodey (r * cols) + padoffsety, trackwidth);
             for (int c = 0; c < cols - 1; c++)
             {
-               track (diodex (c + r * cols), diodey (c + r * cols) - padoffset, NAN, NAN, diodex (c + r * cols + 1),
-                      diodey (c + r * cols + 1) - padoffset, trackwidth);
-               track (diodex (c + r * cols), diodey (c + r * cols) + padoffset, NAN, NAN, diodex (c + r * cols + 1),
-                      diodey (c + r * cols + 1) + padoffset, trackwidth);
+               track (diodex (c + r * cols), diodey (c + r * cols) - padoffsety, NAN, NAN, diodex (c + r * cols + 1),
+                      diodey (c + r * cols + 1) - padoffsety, trackwidth);
+               track (diodex (c + r * cols), diodey (c + r * cols) + padoffsety, NAN, NAN, diodex (c + r * cols + 1),
+                      diodey (c + r * cols + 1) + padoffsety, trackwidth);
             }
-            track (diodex (r * cols + cols - 1), diodey (r * cols + cols - 1) - padoffset, NAN, NAN,
-                   diodex (r * cols + cols - 1) + capoffset, diodey (r * cols + cols - 1) - padoffset, trackwidth);
-            track (diodex (r * cols + cols - 1), diodey (r * cols + cols - 1) + padoffset, NAN, NAN,
-                   diodex (r * cols + cols - 1) + capoffset, diodey (r * cols + cols - 1) + padoffset, trackwidth);
+            track (diodex (r * cols + cols - 1), diodey (r * cols + cols - 1) - padoffsety, NAN, NAN,
+                   diodex (r * cols + cols - 1) + capoffset, diodey (r * cols + cols - 1) - padoffsety, trackwidth);
+            track (diodex (r * cols + cols - 1), diodey (r * cols + cols - 1) + padoffsety, NAN, NAN,
+                   diodex (r * cols + cols - 1) + capoffset, diodey (r * cols + cols - 1) + padoffsety, trackwidth);
          }
       } else
       {                         // Grid with caps at top/bottom
          for (int c = 0; c < cols; c++)
          {
-            trackvia (diodex (c * rows), diodey (c * rows) - padoffset, diodex (c * rows), diodey (c * rows) - viaoffset,
+            trackvia (diodex (c * rows), diodey (c * rows) - padoffsety, diodex (c * rows), diodey (c * rows) - viaoffset,
                       trackwidth, vias);
-            trackvia (diodex (c * rows + rows - 1), diodey (c * rows + rows - 1) + padoffset, diodex (c * rows + rows - 1),
+            trackvia (diodex (c * rows + rows - 1), diodey (c * rows + rows - 1) + padoffsety, diodex (c * rows + rows - 1),
                       diodey (c * rows + rows - 1) + viaoffset, trackwidth, vias);
          }
          for (int c = 0; c < cols; c++)
             for (int r = 0; r < rows - 1; r++)
-               track (diodex (r + c * rows), diodey (r + c * rows) + padoffset, NAN, NAN, diodex (r + c * rows + 1),
-                      diodey (r + c * rows + 1) - padoffset, trackwidth);
+               track (diodex (r + c * rows), diodey (r + c * rows) + padoffsety, NAN, NAN, diodex (r + c * rows + 1),
+                      diodey (r + c * rows + 1) - padoffsety, trackwidth);
          for (int c = 0; c < cols; c++)
          {
-            track (diodex (c * rows) - padoffset, diodey (c * rows) - capoffset, NAN, NAN, diodex (c * rows) - padoffset,
+            track (diodex (c * rows) - padoffsety, diodey (c * rows) - capoffset, NAN, NAN, diodex (c * rows) - padoffsety,
                    diodey (c * rows), trackwidth);
-            track (diodex (c * rows) + padoffset, diodey (c * rows) - capoffset, NAN, NAN, diodex (c * rows) + padoffset,
+            track (diodex (c * rows) + padoffsety, diodey (c * rows) - capoffset, NAN, NAN, diodex (c * rows) + padoffsety,
                    diodey (c * rows), trackwidth);
             for (int r = 0; r < rows - 1; r++)
             {
-               track (diodex (r + c * rows) - padoffset, diodey (r + c * rows), NAN, NAN, diodex (r + c * rows + 1) - padoffset,
+               track (diodex (r + c * rows) - padoffsety, diodey (r + c * rows), NAN, NAN, diodex (r + c * rows + 1) - padoffsety,
                       diodey (r + c * rows + 1), trackwidth);
-               track (diodex (r + c * rows) + padoffset, diodey (r + c * rows), NAN, NAN, diodex (r + c * rows + 1) + padoffset,
+               track (diodex (r + c * rows) + padoffsety, diodey (r + c * rows), NAN, NAN, diodex (r + c * rows + 1) + padoffsety,
                       diodey (r + c * rows + 1), trackwidth);
             }
-            track (diodex (c * rows + rows - 1) - padoffset, diodey (c * rows + rows - 1), NAN, NAN,
-                   diodex (c * rows + rows - 1) - padoffset, diodey (c * rows + rows - 1) + capoffset, trackwidth);
-            track (diodex (c * rows + rows - 1) + padoffset, diodey (c * rows + rows - 1), NAN, NAN,
-                   diodex (c * rows + rows - 1) + padoffset, diodey (c * rows + rows - 1) + capoffset, trackwidth);
+            track (diodex (c * rows + rows - 1) - padoffsety, diodey (c * rows + rows - 1), NAN, NAN,
+                   diodex (c * rows + rows - 1) - padoffsety, diodey (c * rows + rows - 1) + capoffset, trackwidth);
+            track (diodex (c * rows + rows - 1) + padoffsety, diodey (c * rows + rows - 1), NAN, NAN,
+                   diodex (c * rows + rows - 1) + padoffsety, diodey (c * rows + rows - 1) + capoffset, trackwidth);
          }
          if (powervias)
          {
             for (int c = 0; c < cols - 1; c++)
-               trackviamaybe (diodex (c * rows + rows - 1) + padoffset, diodey (c * rows + rows - 1) + capoffset,
+               trackviamaybe (diodex (c * rows + rows - 1) + padoffsety, diodey (c * rows + rows - 1) + capoffset,
                               diodex (c * rows + rows - 1) + spacing / 2, diodey (c * rows + rows - 1) + viaoffset, trackwidth,
                               powervias, "GND");
             for (int c = 1; c < cols; c++)
-               trackviamaybe (diodex (c * rows) - padoffset, diodey (c * rows) - capoffset, diodex (c * rows) - spacing / 2,
+               trackviamaybe (diodex (c * rows) - padoffsety, diodey (c * rows) - capoffset, diodex (c * rows) - spacing / 2,
                               diodey (c * rows) - viaoffset, trackwidth, powervias, fill ? : "VCC");
          }
       }
