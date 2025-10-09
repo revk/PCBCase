@@ -1,6 +1,7 @@
 case
 clean
 tracklen
+placeleds
 case.c.BAK
 tracklen.c.BAK
 *~
