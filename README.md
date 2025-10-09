@@ -6,6 +6,8 @@ This is designed to take an KICad `.kicad_pcb` file and produce an openscad file
 
 [Models](models/README.md)
 
+Some additional tools are included for handling PCB files.
+
 ## 🐳 Using Docker
 
 You can run PCBCase without installing local toolchains by using the provided Docker image.
