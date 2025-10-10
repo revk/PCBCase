@@ -17,7 +17,7 @@ if(hole)
 {
     hull()
     {
-        translate([-11.510,0,2])sphere(d=4,$fn=12);
-        translate([-50,0,2])sphere(d=4,$fn=12);
+        translate([-11.510,0,2])sphere(d=5,$fn=12);
+        translate([-50,0,2])sphere(d=5,$fn=12);
     }
 }
