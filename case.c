@@ -23,7 +23,8 @@ int dnp = 0;
 int norender = 0;
 int toponly = 0;
 int bottomonly = 0;
-int twofile = 0;
+int combined = 0;
+int splitfile = 0;
 int layerpcb = 0;
 int layercase = 0;
 int nohull = 0;
@@ -84,13 +85,13 @@ write_scad (pcb_t * pcb, int tb)
     *o3;
    /* making scad file */
    char *filename = strdup (scadfile);
-   if (twofile)
+   if (splitfile)
    {
       char *c = strrchr (filename, '.');
-      if (c && c > filename && (c[-1] == 'T' || c[-1] == 'B'))
-         c[-1] = (tb ? 'B' : 'T');
+      if (c && c > filename && (c[-1] == 'T' || c[-1] == 'B' || c[-1] == 'C'))
+         c[-1] = (tb == 2 ? 'C' : tb ? 'B' : 'T');
       else
-         errx (1, "Filename must end T.scad or B.scad for --two-file");
+         errx (1, "Filename must end T.scad or B.scad or C.scad for --split-file");
    }
    FILE *f = stdout;
    if (strcmp (filename, "-"))
@@ -189,10 +190,10 @@ write_scad (pcb_t * pcb, int tb)
       {
          void makecuts (double x1, double y1, double xm, double ym, double x2, double y2, int arc)
          {
+            if (a)
+               warnx ("TODO rotate cutout footprint");
             void translate (double *xp, double *yp)
             {
-               if (a)
-                  warnx ("TODO rotate footprint");
                (*xp) += dx;
                (*yp) += dy;
             }
@@ -686,9 +687,9 @@ write_scad (pcb_t * pcb, int tb)
             if (back)
                fprintf (f, "rotate([180,0,0])");
             if (modules[n].n && index)
-               fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n, sidename, index, modules[n].desc, back ? "" : " (back)");
+               fprintf (f, "m%d(part,hole,block,case%s,%s); // %s%s\n", n, sidename, index, modules[n].desc, back ? " (back)" : "");
             else
-               fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n, sidename, modules[n].desc, back ? "" : " (back)");
+               fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n, sidename, modules[n].desc, back ? " (back)" : "");
             fprintf (f, "};\n");
             count++;
             continue;
@@ -844,11 +845,15 @@ write_scad (pcb_t * pcb, int tb)
    }
    if (debug)
       fprintf (f, "translate([spacing*2,0,0])preview();\n");
-   if (toponly || (twofile && !tb))
+   if (toponly || (splitfile && tb == 0))
       fprintf (f, "top();\n");
-   else if (bottomonly || (twofile && tb))
+   else if (bottomonly || (splitfile && tb == 1))
       addbottom ();
-   else if (!norender)
+   else if (combined || (splitfile && tb == 2))
+   {
+      fprintf (f, "translate([0,0,casebottom+casetop+pcbthickness+0.1])rotate([180,0,0])top();\n");
+      addbottom ();
+   } else if (!norender)
    {
       addbottom ();
       fprintf (f, "translate([spacing,0,0])top();\n");
@@ -872,7 +877,8 @@ main (int argc, const char *argv[])
          {"ignore", 'I', POPT_ARG_STRING, &ignore, 0, "Ignore", "ref{,ref}"},
          {"bottom", 'b', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &casebottom, 0, "Case bottom", "mm"},
          {"top", 't', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &casetop, 0, "Case top", "mm"},
-         {"bottom-thickness", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &bottomthickness, 0, "Case bottom max thickness", "mm"},
+         {"bottom-thickness", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &bottomthickness, 0, "Case bottom max thickness",
+          "mm"},
          {"top-thickness", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &topthickness, 0, "Case top max thickness", "mm"},
          {"wall", 'w', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &casewall, 0, "Case wall", "mm"},
          {"edge", 'e', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &edge, 0, "Case edge", "mm"},
@@ -893,8 +899,10 @@ main (int argc, const char *argv[])
          {"curve-delta", 'D', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &delta, 0, "Curve delta", "mm"},
          {"no-render", 'n', POPT_ARG_NONE, &norender, 0, "No-render, just define base() and top()"},
          {"bottom-only", 'B', POPT_ARG_NONE, &bottomonly, 0, "Botton only"},
-         {"top-only", 'T', POPT_ARG_NONE, &toponly, 0, "Top only"},
-         {"two-file", 3, POPT_ARG_NONE, &twofile, 0, "Dual file, replace T.scad with B.scad"},
+         {"top-only", 0, POPT_ARG_NONE, &combined, 0, "Top on bottom combined"},
+         {"combined", 'C', POPT_ARG_NONE, &toponly, 0, "Top only"},
+         {"two-file", 3, POPT_ARG_NONE | POPT_ARGFLAG_DOC_HIDDEN, &splitfile, 0, "Dual file, replace T.scad with B.scad"},
+         {"split-file", 3, POPT_ARG_NONE, &splitfile, 0, "Split file, creates T/B/C.scad"},
          {"dnp", 0, POPT_ARG_NONE, &dnp, 0, "Include DNP"},
          {"origin-x", 'x', POPT_ARG_DOUBLE, &originx, 0, "Origin X", "mm"},
          {"origin-y", 'y', POPT_ARG_DOUBLE, &originy, 0, "Origin Y", "mm"},
@@ -951,8 +959,11 @@ main (int argc, const char *argv[])
    if (strcmp (pcb->tag, "kicad_pcb"))
       errx (1, "Not a kicad_pcb (%s)", pcb->tag);
    write_scad (pcb, 0);
-   if (twofile)
+   if (splitfile)
+   {
       write_scad (pcb, 1);
+      write_scad (pcb, 2);
+   }
    pcb = pcb_free (pcb);
 
    poptFreeContext (optCon);
