@@ -52,14 +52,14 @@ if("$stl" != '*.stl') then
 		rm -f "x$s:r.scad"
 	end
 	foreach s ($stl)
-		setenv N `echo "$s" | sed 's/[BT].stl$//'`
-		if("$N" != "$s" && "$s" != "${N}T.stl" && -e "${N}B.stl" && -e "${N}T.stl") then
+		setenv N `echo "$s" | sed 's/[BTC].stl$//'`
+		if("$N" != "$s" && "$s" != "${N}B.stl" && "$s" != "${N}T.stl" && -e "${N}B.stl" && -e "${N}T.stl" && -e "${N}C.stl") then
 			@ c = $c + 1
 			if($c == 1) then
-				echo "|Design|Bottom|Top|" >> "$TMP"
-				echo "|------|------|---|" >> "$TMP"
+				echo "|Design|Bottom|Top|Combined|" >> "$TMP"
+				echo "|------|------|---|--------|" >> "$TMP"
 			endif
-			echo "|$N|<a href='${N}B.stl'><img src='${N}B.png' size=15%></a>|<a href='${N}T.stl'><img src='${N}T.png' size=15%></a>|" >> "$TMP"
+			echo "|$N|<a href='${N}B.stl'><img src='${N}B.png' size=15%></a>|<a href='${N}T.stl'><img src='${N}T.png' size=15%></a>|<a href='${N}C.stl'><img src='${N}C.png' size=15%></a>|" >> "$TMP"
 		endif
 	end
 	if($c) then
@@ -67,8 +67,8 @@ if("$stl" != '*.stl') then
 	endif
 	set c=0
 	foreach s ($stl)
-		setenv N `echo "$s" | sed 's/[BT].stl$//'`
-		if("$N" == "$s" || ! -e "${N}B.stl" || ! -e "${N}T.stl") then
+		setenv N `echo "$s" | sed 's/[BTC].stl$//'`
+		if("$N" == "$s" || ! -e "${N}B.stl" || ! -e "${N}T.stl" || ! -e "${N}C.stl") then
 			@ c = $c + 1
 			echo "- [$s:r]($s)" >> "$TMP"
 		endif
