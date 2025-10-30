@@ -65,7 +65,7 @@ double logoh = 3;
 double logot = 0.5;
 int logoa = 0;
 char *logof = "AJK";
-char *logo = NULL;
+char *logo = "A";
 
 void
 copy_file (FILE * o, const char *fn)
