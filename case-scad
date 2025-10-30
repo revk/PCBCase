@@ -358,3 +358,12 @@ module datecode()
 		cylinder(d1=datet,d2=0,h=datet,$fn=6);
 	}
 }
+
+module logocode()
+{
+	minkowski()
+	{
+		translate([logox,logoy,-1])rotate(logoa)scale([-1,1])linear_extrude(1)text(logo,size=logoh,halign="center",valign="center",font=logof);
+		cylinder(d1=logot,d2=0,h=logot,$fn=6);
+	}
+}

@@ -59,6 +59,13 @@ double datet = 0.5;
 int datea = 0;
 char *datef = "OCRB";
 char *date = NULL;
+double logox = 0;               // Logo text
+double logoy = 0;
+double logoh = 3;
+double logot = 0.5;
+int logoa = 0;
+char *logof = "AJK";
+char *logo = NULL;
 
 void
 copy_file (FILE * o, const char *fn)
@@ -159,6 +166,16 @@ write_scad (pcb_t * pcb, int tb)
       fprintf (f, "datea=%d;\n", datea);
       fprintf (f, "date=\"%s\";\n", date);
       fprintf (f, "datef=\"%s\";\n", datef);
+   }
+   if (logo && *logo && logoh > 0 && logot > 0)
+   {
+      fprintf (f, "logox=%lf;\n", logox);
+      fprintf (f, "logoy=%lf;\n", logoy);
+      fprintf (f, "logot=%lf;\n", logot);
+      fprintf (f, "logoh=%lf;\n", logoh);
+      fprintf (f, "logoa=%d;\n", logoa);
+      fprintf (f, "logo=\"%s\";\n", logo);
+      fprintf (f, "logof=\"%s\";\n", logof);
    }
 
    double lx = DBL_MAX,
@@ -835,6 +852,14 @@ write_scad (pcb_t * pcb, int tb)
    else
       copy_file (f, "../case-scad");
 
+   void addtop (void)
+   {
+      if (logo && *logo && logot > 0 && logoh > 0)
+         fprintf (f, "difference(){");
+      fprintf (f, "top();");
+      if (logo && *logo && logot > 0 && logoh > 0)
+         fprintf (f, "logocode();}");
+   }
    void addbottom (void)
    {
       if (date && *date && datet > 0 && dateh > 0)
@@ -846,12 +871,13 @@ write_scad (pcb_t * pcb, int tb)
    if (debug)
       fprintf (f, "translate([spacing*2,0,0])preview();\n");
    if (toponly || (splitfile && tb == 0))
-      fprintf (f, "top();\n");
+	   addtop();
    else if (bottomonly || (splitfile && tb == 1))
       addbottom ();
    else if (combined || (splitfile && tb == 2))
    {
-      fprintf (f, "translate([0,0,casebottom+casetop+pcbthickness+0.1])rotate([180,0,0])top();\n");
+      fprintf (f, "translate([0,0,casebottom+casetop+pcbthickness+0.1])rotate([180,0,0])");
+      addtop();
       addbottom ();
    } else if (!norender)
    {
@@ -913,6 +939,13 @@ main (int argc, const char *argv[])
          {"date-thickness", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &datet, 0, "Date text thickness", "mm"},
          {"date-font", 0, POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &datef, 0, "Date text font", "font"},
          {"date", 0, POPT_ARG_STRING, &date, 0, "Date text (default is from file)", "text"},
+         {"logo-x", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &logox, 0, "Logo X pos", "mm"},
+         {"logo-y", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &logoy, 0, "Logo Y pos", "mm"},
+         {"logo-angle", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &logoa, 0, "Logo angle", "degrees"},
+         {"logo-height", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &logoh, 0, "Logo text height", "mm"},
+         {"logo-thickness", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &logot, 0, "Logo text thickness", "mm"},
+         {"logo-font", 0, POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &logof, 0, "Logo text font", "font"},
+         {"logo", 0, POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &logo, 0, "Logo text", "text"},
          {"debug", 'v', POPT_ARG_NONE, &debug, 0, "Debug"},
          POPT_AUTOHELP {}
       };
