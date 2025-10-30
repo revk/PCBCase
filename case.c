@@ -871,13 +871,13 @@ write_scad (pcb_t * pcb, int tb)
    if (debug)
       fprintf (f, "translate([spacing*2,0,0])preview();\n");
    if (toponly || (splitfile && tb == 0))
-	   addtop();
+      addtop ();
    else if (bottomonly || (splitfile && tb == 1))
       addbottom ();
    else if (combined || (splitfile && tb == 2))
    {
       fprintf (f, "translate([0,0,casebottom+casetop+pcbthickness+0.1])rotate([180,0,0])");
-      addtop();
+      addtop ();
       addbottom ();
    } else if (!norender)
    {
