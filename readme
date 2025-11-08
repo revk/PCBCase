@@ -48,7 +48,7 @@ if("$stl" != '*.stl') then
 	foreach s ($stl)
 		echo "import("'"'"$s:t"'"'");" >> "x$s:r.scad"
 		/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD --colorscheme=WhiteResin --autocenter --viewall --render --imgsize=4096,4096 -o "$s:r.png" "x$s:r.scad"
-		magick "$s:r.png" -transparent '#4589cd' -resize 1024x1024 "$s:r.png"
+		magick "$s:r.png" -transparent '#4589cd' -resize 1024x1024 -trim -bordercolor None -border 10 "$s:r.png"
 		rm -f "x$s:r.scad"
 	end
 	foreach s ($stl)
