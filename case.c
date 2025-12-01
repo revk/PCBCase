@@ -68,7 +68,7 @@ char *logof = "AJK";
 char *logo = "A";
 
 void
-copy_file (FILE * o, const char *fn)
+copy_file (FILE *o, const char *fn)
 {
    int f = open (fn, O_RDONLY);
    if (f < 0)
@@ -85,7 +85,7 @@ copy_file (FILE * o, const char *fn)
 }
 
 void
-write_scad (pcb_t * pcb, int tb)
+write_scad (pcb_t *pcb, int tb)
 {
    pcb_t *o,
     *o2,
@@ -775,6 +775,7 @@ write_scad (pcb_t * pcb, int tb)
                            back ? "" : " (back)");
                else
                   fprintf (f, "m%d(part,hole,block,case%s); // %s%s\n", n, sidename, modules[n].desc, back ? "" : " (back)");
+               count++;
                if (n < 0)
                   warnx ("Missing part %s %s", ref, footprint);
             } else
