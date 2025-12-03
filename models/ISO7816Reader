@@ -6,4 +6,10 @@ if(part)
     		cube([54,1,1]);
     		translate([-5,10,-5])cube([54+10,1,1+10]);
     	}
+	translate([-29,10,-5])cylinder(d=3,h=5);
+	translate([29,-10,-5])cylinder(d=3,h=5);
+	translate([29,10,-5])cylinder(d=4,h=5);
+	translate([-29,-10,-5])cylinder(d=4,h=5);
+	for(x=[-13.489,-8.4])translate([x,-18.05,-4])cylinder(d1=1,d2=2,h=4);
+	for(x=[-0.78,1.76,4.3,6.84])for(y=[-19.05,19.05])translate([x,y,-4])cylinder(d1=1,d2=2,h=4);
 }
