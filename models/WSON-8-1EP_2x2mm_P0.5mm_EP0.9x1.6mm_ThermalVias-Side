@@ -12,5 +12,5 @@ if(hole)
 }
 if(block)
 {
-    translate([0,0,height-6])b(0,0,-2,8,5,6);
+    b(0,0,0,8,5,height);
 }
