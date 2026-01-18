@@ -66,6 +66,13 @@ double logot = 0.5;
 int logoa = 0;
 char *logof = "AJK";
 char *logo = "A";
+double namex = 0;               // Logo text
+double namey = -10;
+double nameh = 10;
+double namet = 0.5;
+int namea = 0;
+char *namef = "OCRB";
+char *name = NULL;
 
 void
 copy_file (FILE *o, const char *fn)
@@ -133,8 +140,11 @@ write_scad (pcb_t *pcb, int tb)
          if (o->values[n].isobj && (o2 = o->values[n].obj)->valuen >= 1)
          {
             if (o2->values[o2->valuen - 1].istxt)
+            {
                fprintf (f, "// %s:\t%s\n", o2->tag, o2->values[o2->valuen - 1].txt);
-            else if (o2->values[0].isnum)
+               if (!name)
+                  name = (char *) o2->values[o2->valuen - 1].txt;
+            } else if (o2->values[0].isnum)
                fprintf (f, "// %s:\t%lf\n", o2->tag, o2->values[0].num);
          }
    fprintf (f, "//\n\n");
@@ -177,12 +187,21 @@ write_scad (pcb_t *pcb, int tb)
       fprintf (f, "logo=\"%s\";\n", logo);
       fprintf (f, "logof=\"%s\";\n", logof);
    }
+   if (name && *name && nameh > 0 && namet > 0)
+   {
+      fprintf (f, "namex=%lf;\n", namex);
+      fprintf (f, "namey=%lf;\n", namey);
+      fprintf (f, "namet=%lf;\n", namet);
+      fprintf (f, "nameh=%lf;\n", nameh);
+      fprintf (f, "namea=%d;\n", namea);
+      fprintf (f, "name=\"%s\";\n", name);
+      fprintf (f, "namef=\"%s\";\n", namef);
+   }
 
    double lx = DBL_MAX,
       hx = -DBL_MAX,
       ly = DBL_MAX,
       hy = -DBL_MAX;
-   double ry;                   /* reference for Y, as it is flipped! */
    /* sanity */
    if (!pcbthickness)
       errx (1, "Specify pcb thickness");
@@ -855,11 +874,15 @@ write_scad (pcb_t *pcb, int tb)
 
    void addtop (void)
    {
-      if (logo && *logo && logot > 0 && logoh > 0)
+      if ((logo && *logo && logot > 0 && logoh > 0) || (name && *name && namet > 0 && nameh > 0))
          fprintf (f, "difference(){");
       fprintf (f, "top();");
       if (logo && *logo && logot > 0 && logoh > 0)
-         fprintf (f, "logocode();}");
+         fprintf (f, "logocode();");
+      if (name && *name && namet > 0 && nameh > 0)
+         fprintf (f, "namecode();");
+      if ((logo && *logo && logot > 0 && logoh > 0) || (name && *name && namet > 0 && nameh > 0))
+         printf ("}");
    }
    void addbottom (void)
    {
@@ -947,6 +970,13 @@ main (int argc, const char *argv[])
          {"logo-thickness", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &logot, 0, "Logo text thickness", "mm"},
          {"logo-font", 0, POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &logof, 0, "Logo text font", "font"},
          {"logo", 0, POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &logo, 0, "Logo text", "text"},
+         {"name-x", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &namex, 0, "Name X pos", "mm"},
+         {"name-y", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &namey, 0, "Name Y pos", "mm"},
+         {"name-angle", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &namea, 0, "Name angle", "degrees"},
+         {"name-height", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &nameh, 0, "Name text height", "mm"},
+         {"name-thickness", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &namet, 0, "Name text thickness", "mm"},
+         {"name-font", 0, POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &namef, 0, "Name text font", "font"},
+         {"name", 0, POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &name, 0, "Name text", "text"},
          {"debug", 'v', POPT_ARG_NONE, &debug, 0, "Debug"},
          POPT_AUTOHELP {}
       };
