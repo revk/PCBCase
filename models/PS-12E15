@@ -1,6 +1,7 @@
 if(part)
 {
  translate([12.2-0.1-6,1.15-5.1/2,3.3])cube([9.9+0.1,2.8,2.8]);
+ translate([12.2-0.1-6,0,4.7])rotate([0,90,0])cylinder(d=5.1,h=5.8+0.1);
  translate([-6,-5.1/2,0])cube([12.6,5.1,8.3]);
  translate([-2.5,0,-3.6])cylinder(d=0.5,h=3.6+0.1);
  translate([0,0,-3.6])cylinder(d=0.5,h=3.6+0.1);
