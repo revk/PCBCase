@@ -367,3 +367,12 @@ module logocode()
 		cylinder(d1=logot,d2=0,h=logot,$fn=6);
 	}
 }
+
+module namecode()
+{
+	minkowski()
+	{
+		translate([namex,namey,-1])rotate(namea)scale([-1,1])linear_extrude(1)text(name,size=nameh,halign="center",valign="center",font=namef);
+		cylinder(d1=namet,d2=0,h=namet,$fn=6);
+	}
+}

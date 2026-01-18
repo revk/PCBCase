@@ -882,7 +882,7 @@ write_scad (pcb_t *pcb, int tb)
       if (name && *name && namet > 0 && nameh > 0)
          fprintf (f, "namecode();");
       if ((logo && *logo && logot > 0 && logoh > 0) || (name && *name && namet > 0 && nameh > 0))
-         printf ("}");
+         fprintf (f, "}");
    }
    void addbottom (void)
    {
